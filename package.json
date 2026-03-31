@@ -1,10 +1,17 @@
 {
+<<<<<<< HEAD
   "name": "e-soko-frontend",
+=======
+  "name": "ecommerce-frontend",
+>>>>>>> ac8d25c (updating code)
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+<<<<<<< HEAD
     "start": "vite",
+=======
+>>>>>>> ac8d25c (updating code)
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
