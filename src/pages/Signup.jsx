@@ -18,12 +18,13 @@ const Signup = () => {
           <label className="block text-sm font-medium text-gray-700">Password</label>
           <input type="password" className="w-full mt-1 p-2 border rounded-lg" placeholder="Min 8 characters" />
         </div>
-        <button className="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+        <button className="w-full bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition">
           Register
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-gray-600">
-        Already have an account? <Link to="/login" className="text-blue-600 font-bold">Login</Link>
+        Already have an account?{' '}
+        <Link to="/login" className="text-green-600 font-bold">Login</Link>
       </p>
     </div>
   );
