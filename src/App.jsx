@@ -18,7 +18,7 @@ function App() {
       <Router>
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <Navbar />
-          
+
           <main className="flex-grow container mx-auto px-4 py-8">
             <Routes>
               {/* Public Routes */}
@@ -28,17 +28,17 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
 
-              {/* Private Routes (Requires Auth) */}
-              <Route 
-                path="/checkout" 
+              {/* Protected Route */}
+              <Route
+                path="/checkout"
                 element={
                   <ProtectedRoute>
                     <Checkout />
                   </ProtectedRoute>
-                } 
+                }
               />
 
-              {/* 404 Redirect */}
+              {/* Catch-all */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
