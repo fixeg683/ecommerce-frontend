@@ -1,59 +1,49 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { ShoppingCart, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import api from '../api/axios';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        // Uses the environment variable we set in Vercel
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/products/`);
-        setProducts(response.data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
+    api.get('products/')
+      .then(res => setProducts(res.data))
+      .catch(() => setError('Failed to load products. Please try again.'))
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-      </div>
-    );
-  }
+  if (loading) return <p className="text-center py-10 text-gray-500">Loading products...</p>;
+  if (error) return <p className="text-center py-10 text-red-500">{error}</p>;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold text-gray-800">Explore Products</h1>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {products.map((product) => (
-          <div key={product.id} className="overflow-hidden rounded-xl bg-white shadow-md transition-hover hover:shadow-lg">
-            <img 
-              src={product.image} 
-              alt={product.name} 
-              className="h-48 w-full object-cover"
-            />
-            <div className="p-4">
-              <h2 className="text-lg font-semibold text-gray-700">{product.name}</h2>
-              <p className="mt-1 text-sm text-gray-500 line-clamp-2">{product.description}</p>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-xl font-bold text-blue-600">KES {product.price}</span>
-                <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-white hover:bg-blue-700">
-                  <ShoppingCart size={18} />
-                  Add
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div>
+      <h1 className="text-3xl font-bold mb-6">Explore Products</h1>
+      {products.length === 0 ? (
+        <p className="text-gray-500">No products available.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.map(product => (
+            <Link
+              key={product.id}
+              to={`/product/${product.id}`}
+              className="bg-white rounded-xl shadow hover:shadow-md transition p-4 flex flex-col"
+            >
+              {product.image && (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-48 object-cover rounded-lg mb-3"
+                />
+              )}
+              <h2 className="font-semibold text-lg">{product.name}</h2>
+              <p className="text-gray-500 text-sm flex-grow">{product.description}</p>
+              <p className="text-green-600 font-bold mt-2">KES {product.price}</p>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
