@@ -1,57 +1,120 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { User, Mail, Lock } from 'lucide-react';
+import React, { useState } from 'react';
 
-const Signup = () => {
+function Signup() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // TEMP: Replace with API call later
+    console.log('Signup Data:', formData);
+    alert('Signup successful (demo)');
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-[80vh] px-4">
-      <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border-2 border-green-500">
-        <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-2">Create Account</h2>
-        <p className="text-center text-gray-500 mb-8 font-medium">Join the E-Space community</p>
-        
-        <form className="space-y-5">
-          {/* Full Name */}
-          <div className="relative">
-            <User className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input 
-              type="text" 
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-500 outline-none transition" 
-              placeholder="Full Name" 
-            />
-          </div>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#f3f4f6'
+    }}>
+      <div style={{
+        padding: '2rem',
+        backgroundColor: 'white',
+        borderRadius: '10px',
+        boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+        width: '320px',
+        textAlign: 'center'
+      }}>
+        <h1 style={{ fontSize: '24px', marginBottom: '1rem' }}>
+          Create Account
+        </h1>
 
-          {/* Email */}
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input 
-              type="email" 
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-500 outline-none transition" 
-              placeholder="Email address" 
-            />
-          </div>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            name="name"
+            placeholder="Full Name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            style={{
+              width: '100%',
+              padding: '10px',
+              marginBottom: '10px',
+              border: '1px solid #ccc',
+              borderRadius: '5px'
+            }}
+          />
 
-          {/* Password */}
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input 
-              type="password" 
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-500 outline-none transition" 
-              placeholder="Password (min 8 characters)" 
-            />
-          </div>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            style={{
+              width: '100%',
+              padding: '10px',
+              marginBottom: '10px',
+              border: '1px solid #ccc',
+              borderRadius: '5px'
+            }}
+          />
 
-          <button className="w-full bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transform active:scale-95 transition-all">
-            Register Now
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            style={{
+              width: '100%',
+              padding: '10px',
+              marginBottom: '15px',
+              border: '1px solid #ccc',
+              borderRadius: '5px'
+            }}
+          />
+
+          <button
+            type="submit"
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#16a34a',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px'
+            }}
+          >
+            Sign Up
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-600">
+        <p style={{ marginTop: '1rem', fontSize: '14px' }}>
           Already have an account?{' '}
-          <Link to="/login" className="text-green-600 font-bold hover:underline">Login</Link>
+          <a href="/login" style={{ color: '#2563eb' }}>
+            Login
+          </a>
         </p>
       </div>
     </div>
   );
-};
+}
 
 export default Signup;
