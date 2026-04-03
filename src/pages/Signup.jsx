@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import api from '../api/axios'; // Use your custom instance!
 
 function Signup() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -12,30 +13,67 @@ function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      // API Call to Django
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/register/`, formData);
+      // Using 'api' automatically uses your Render URL
+      await api.post('/register/', formData); 
       alert('Signup successful! Please login.');
       navigate('/login');
     } catch (error) {
-      alert('Signup failed: ' + JSON.stringify(error.response?.data));
+      const errorMsg = error.response?.data ? JSON.stringify(error.response.data) : 'Connection failed';
+      alert('Signup failed: ' + errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f3f4f6' }}>
-      <div style={{ padding: '2rem', backgroundColor: 'white', borderRadius: '10px', boxShadow: '0 0 10px rgba(0,0,0,0.1)', width: '320px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '24px', marginBottom: '1rem' }}>Create Account</h1>
-        <form onSubmit={handleSubmit}>
-          <input type="text" name="name" placeholder="Full Name" onChange={handleChange} required style={{ width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ccc', borderRadius: '5px' }} />
-          <input type="email" name="email" placeholder="Email" onChange={handleChange} required style={{ width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ccc', borderRadius: '5px' }} />
-          <input type="password" name="password" placeholder="Password" onChange={handleChange} required style={{ width: '100%', padding: '10px', marginBottom: '15px', border: '1px solid #ccc', borderRadius: '5px' }} />
-          <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#16a34a', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
-            Sign Up
+    <div style={{ minHeight: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ 
+        padding: '2.5rem', 
+        backgroundColor: 'white', 
+        borderRadius: '16px', 
+        boxShadow: '0 10px 25px rgba(0,0,0,0.05)', 
+        width: '100%', 
+        maxWidth: '400px', 
+        textAlign: 'center',
+        border: '1px solid #e5e7eb'
+      }}>
+        <h1 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '1rem' }}>Create Account</h1>
+        
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <input 
+            type="text" name="name" placeholder="Full Name" onChange={handleChange} required 
+            style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }} 
+          />
+          <input 
+            type="email" name="email" placeholder="Email Address" onChange={handleChange} required 
+            style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }} 
+          />
+          <input 
+            type="password" name="password" placeholder="Create Password" onChange={handleChange} required 
+            style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px' }} 
+          />
+          
+          <button 
+            type="submit" 
+            disabled={loading}
+            style={{ 
+              width: '100%', padding: '14px', 
+              backgroundColor: loading ? '#9ca3af' : '#16a34a', 
+              color: 'white', border: 'none', borderRadius: '8px', 
+              fontWeight: '700', cursor: 'pointer', marginTop: '10px' 
+            }}
+          >
+            {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
-        <p style={{ marginTop: '1rem', fontSize: '14px' }}>
-          Already have an account? <a href="/login" style={{ color: '#2563eb' }}>Login</a>
+
+        <p style={{ marginTop: '1.5rem', fontSize: '14px', color: '#4b5563' }}>
+          Already have an account?{' '}
+          <Link to="/login" style={{ color: '#16a34a', fontWeight: '700', textDecoration: 'none' }}>
+            Login
+          </Link>
         </p>
       </div>
     </div>
