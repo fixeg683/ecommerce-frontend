@@ -1,44 +1,47 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
 
 const Login = () => {
   return (
-    <div className="flex items-center justify-center min-h-[70vh] px-4">
-      <div className="w-full max-w-md bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-100">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-900">Welcome Back</h2>
-          <p className="text-gray-500 mt-2">Log in to manage your orders</p>
-        </div>
-
-        <form className="space-y-5">
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input 
-              type="email" 
-              placeholder="Email address"
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition"
-            />
-          </div>
-
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input 
-              type="password" 
-              placeholder="Password"
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition"
-            />
-          </div>
-
-          <button className="w-full bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transform active:scale-95 transition flex items-center justify-center gap-2">
-            Sign In <ArrowRight size={20} />
-          </button>
-        </form>
-
-        <div className="mt-8 text-center border-t pt-6">
-          <p className="text-gray-600">
-            New to E-Soko? <Link to="/signup" className="text-green-600 font-bold hover:underline">Create an account</Link>
+    <div className="flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border-2 border-green-500">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Sign in to E-Soko
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600 font-medium">
+            Your Kenyan Marketplace
           </p>
+        </div>
+        <form className="mt-8 space-y-6">
+          <div className="rounded-md shadow-sm -space-y-px">
+            <input
+              type="email"
+              required
+              className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+              placeholder="Email address"
+            />
+            <input
+              type="password"
+              required
+              className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+              placeholder="Password"
+            />
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+            >
+              Sign in
+            </button>
+          </div>
+        </form>
+        <div className="text-center text-sm">
+          <Link to="/signup" className="font-bold text-green-600 hover:text-green-500">
+            Don't have an account? Sign up
+          </Link>
         </div>
       </div>
     </div>
