@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  baseURL: `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api`,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -23,9 +23,8 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refresh_token');
       if (refreshToken) {
         try {
-          // Fixed: removed duplicate /api/ prefix
           const res = await axios.post(
-            `${api.defaults.baseURL}/token/refresh/`,
+            `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/token/refresh/`,
             { refresh: refreshToken }
           );
           if (res.status === 200) {
