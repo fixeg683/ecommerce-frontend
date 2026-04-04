@@ -15,7 +15,6 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
-
   const activeCategory = searchParams.get('category') || 'All';
 
   const fetchProducts = () => {
@@ -25,19 +24,17 @@ const Home = () => {
       .then(res => setProducts(res.data))
       .catch((err) => {
         console.error('API Error:', err);
-        setError('Failed to load products. Our backend might be warming up. Please try again.');
+        setError('Failed to load products. Please try again.');
       })
       .finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchProducts(); }, []);
 
-  // Filter by category name (matches Django Category.name)
   const filtered = activeCategory === 'All'
     ? products
     : products.filter(p =>
-        p.category_name?.toLowerCase() === activeCategory.toLowerCase() ||
-        p.category?.toString() === activeCategory
+        p.category_name?.toLowerCase() === activeCategory.toLowerCase()
       );
 
   const CategoryIcon = CATEGORY_ICONS[activeCategory];
@@ -53,15 +50,12 @@ const Home = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4">
+      <div className="flex flex-col items-center justify-center min-h-[70vh]">
         <div className="bg-red-50 border border-red-200 rounded-2xl px-10 py-12 text-center max-w-lg w-full">
           <AlertTriangle className="text-red-400 mx-auto mb-4" size={52} />
           <p className="text-xl font-bold text-red-600 mb-2">Connection Error</p>
           <p className="text-gray-600 text-sm mb-6">{error}</p>
-          <button
-            onClick={fetchProducts}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3 rounded-lg transition"
-          >
+          <button onClick={fetchProducts} className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3 rounded-lg transition">
             Try Again
           </button>
         </div>
@@ -71,19 +65,16 @@ const Home = () => {
 
   return (
     <div className="w-full">
-
       {/* Header */}
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
         <div className="flex items-center gap-3">
           {CategoryIcon && <CategoryIcon size={28} className="text-green-600" />}
           <div>
-            <h1 className="text-4xl font-black text-gray-900">
+            <h1 className="text-3xl font-black text-gray-900">
               {activeCategory === 'All' ? 'Explore Products' : activeCategory}
             </h1>
             <p className="text-gray-400 text-sm mt-0.5">
-              {activeCategory === 'All'
-                ? 'Discover the best deals on E-Space'
-                : `Browsing ${activeCategory.toLowerCase()} on E-Space`}
+              {activeCategory === 'All' ? 'Discover the best deals on E-Space' : `Browsing ${activeCategory.toLowerCase()}`}
             </p>
           </div>
         </div>
@@ -92,7 +83,7 @@ const Home = () => {
         </span>
       </div>
 
-      {/* Category filter pills */}
+      {/* Category pills */}
       <div className="flex flex-wrap gap-2 mb-8">
         {['All', 'Softwares', 'Games', 'Movies'].map((cat) => {
           const Icon = CATEGORY_ICONS[cat];
@@ -100,13 +91,10 @@ const Home = () => {
           return (
             <button
               key={cat}
-              onClick={() => cat === 'All'
-                ? setSearchParams({})
-                : setSearchParams({ category: cat })
-              }
+              onClick={() => cat === 'All' ? setSearchParams({}) : setSearchParams({ category: cat })}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition ${
                 isActive
-                  ? 'bg-green-600 text-white border-green-600'
+                  ? 'bg-green-600 text-white border-green-600 shadow-sm'
                   : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-600'
               }`}
             >
@@ -117,7 +105,7 @@ const Home = () => {
         })}
       </div>
 
-      {/* Empty state */}
+      {/* Grid — full width, responsive columns */}
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4 border-2 border-dashed border-gray-200 rounded-2xl bg-white">
           <PackageSearch size={72} className="text-gray-200" />
@@ -127,7 +115,7 @@ const Home = () => {
           <p className="text-gray-300 text-sm">Check back later or add some in the admin.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
           {filtered.map(product => (
             <ProductCard key={product.id} product={product} />
           ))}

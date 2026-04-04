@@ -21,7 +21,7 @@ function AppLayout() {
       {!isAuthPage && <Navbar />}
       {!isAuthPage && <CartDrawer />}
 
-      <main className={isAuthPage ? '' : 'flex-grow w-full max-w-7xl mx-auto px-6 py-10'}>
+      <main className={isAuthPage ? '' : 'flex-grow w-full px-6 py-8'}>
         <Routes>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
