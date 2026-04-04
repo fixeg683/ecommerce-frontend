@@ -17,18 +17,25 @@ function AppLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {!isAuthPage && <Navbar />}
+
       <main className={isAuthPage ? '' : 'flex-grow w-full max-w-7xl mx-auto px-6 py-10'}>
         <Routes>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          } />
-          <Route path="*" element={<Navigate to="/signup" replace />} />
+
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+
       {!isAuthPage && (
         <footer className="py-4 text-center text-gray-400 text-xs border-t bg-white mt-auto">
           &copy; 2026 E-Space Marketplace

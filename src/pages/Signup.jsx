@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 function Signup() {
   const { signup } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -19,11 +20,11 @@ function Signup() {
     setError('');
     try {
       await signup(formData.name, formData.email, formData.password);
+      // ✅ After signup, redirect to login to authenticate
+      navigate('/login');
     } catch (err) {
-      const msg = err.response?.data
-        ? Object.values(err.response.data).flat().join(' ')
-        : 'Signup failed. Please try again.';
-      setError(msg);
+      // ✅ AuthContext now throws Error objects with .message
+      setError(err.message || 'Signup failed. Please try again.');
     } finally {
       setLoading(false);
     }
