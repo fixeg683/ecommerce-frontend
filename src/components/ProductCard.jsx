@@ -1,19 +1,28 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Download } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const FALLBACK_IMAGE = 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
+const BACKEND_URL = "https://backend-ecommerce-3-href.onrender.com";
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
 
+  // Helper to ensure the image URL is absolute
+  const getFullImageUrl = (path) => {
+    if (!path) return FALLBACK_IMAGE;
+    // If the path is already a full URL (starting with http), return it. 
+    // Otherwise, prefix it with your Render backend URL.
+    return path.startsWith('http') ? path : `${BACKEND_URL}${path}`;
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 flex flex-col group overflow-hidden">
-      {/* Image */}
+      {/* Image Section */}
       <Link to={`/product/${product.id}`}>
         <div className="w-full h-56 overflow-hidden bg-gray-50">
           <img
-            src={product.image || FALLBACK_IMAGE}
+            src={getFullImageUrl(product.image)}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             onError={(e) => {
@@ -24,14 +33,30 @@ const ProductCard = ({ product }) => {
         </div>
       </Link>
 
-      {/* Body */}
+      {/* Body Section */}
       <div className="p-5 flex flex-col flex-grow">
-        <Link to={`/product/${product.id}`}>
-          <h2 className="font-bold text-lg text-gray-900 line-clamp-1 hover:text-green-600 transition">
-            {product.name}
-          </h2>
-        </Link>
-        <p className="text-gray-400 text-sm line-clamp-2 mt-1 mb-4 flex-grow">
+        <div className="flex justify-between items-start mb-1">
+          <Link to={`/product/${product.id}`}>
+            <h2 className="font-bold text-lg text-gray-900 line-clamp-1 hover:text-green-600 transition">
+              {product.name}
+            </h2>
+          </Link>
+          
+          {/* Download Button for Software/Games (only if product.file exists) */}
+          {product.file && (
+            <a 
+              href={`${BACKEND_URL}${product.file}`} 
+              download 
+              className="text-blue-500 hover:text-blue-700 transition-colors"
+              title="Download Software"
+              onClick={(e) => e.stopPropagation()} // Prevents navigation to product detail
+            >
+              <Download size={20} />
+            </a>
+          )}
+        </div>
+
+        <p className="text-gray-400 text-sm line-clamp-2 mb-4 flex-grow">
           {product.description}
         </p>
 
