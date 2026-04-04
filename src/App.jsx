@@ -4,9 +4,11 @@ import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
+import CartDrawer from './components/CartDrawer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Cart from './pages/Cart';
 
 const AUTH_ROUTES = ['/login', '/signup'];
 
@@ -17,22 +19,19 @@ function AppLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {!isAuthPage && <Navbar />}
+      {!isAuthPage && <CartDrawer />}
 
       <main className={isAuthPage ? '' : 'flex-grow w-full max-w-7xl mx-auto px-6 py-10'}>
         <Routes>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/" element={
+            <ProtectedRoute><Home /></ProtectedRoute>
+          } />
+          <Route path="/cart" element={
+            <ProtectedRoute><Cart /></ProtectedRoute>
+          } />
+          <Route path="*" element={<Navigate to="/signup" replace />} />
         </Routes>
       </main>
 
