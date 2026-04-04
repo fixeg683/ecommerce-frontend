@@ -55,7 +55,7 @@ const Home = () => {
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
         <div>
           <h1 className="text-4xl font-black text-gray-900">Explore Products</h1>
-          <p className="text-gray-400 text-sm mt-1">Discover the best deals on E-Soko</p>
+          <p className="text-gray-400 text-sm mt-1">Discover the best deals on E-Space</p>
         </div>
         <span className="bg-green-50 text-green-700 text-sm font-semibold px-4 py-2 rounded-full border border-green-100">
           {products.length} {products.length === 1 ? 'Item' : 'Items'} Found

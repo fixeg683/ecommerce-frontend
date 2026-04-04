@@ -31,7 +31,7 @@ function AppLayout() {
       </main>
       {!isAuthPage && (
         <footer className="py-4 text-center text-gray-400 text-xs border-t bg-white mt-auto">
-          &copy; 2026 E-Soko Marketplace
+          &copy; 2026 E-Space Marketplace
         </footer>
       )}
     </div>

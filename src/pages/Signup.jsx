@@ -32,11 +32,10 @@ function Signup() {
   return (
     <div className="fixed inset-0 bg-gray-50 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-10 w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-black text-green-600 mb-1">E-Soko</h1>
+          <h1 className="text-4xl font-black text-green-600 mb-1">E-Space</h1>
           <p className="text-2xl font-extrabold text-gray-900 mt-4">Create Account</p>
-          <p className="text-gray-500 text-sm mt-1">Join E-Soko and start shopping</p>
+          <p className="text-gray-500 text-sm mt-1">Join E-Space and start shopping</p>
         </div>
 
         {error && (
