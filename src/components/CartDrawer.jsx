@@ -5,33 +5,24 @@ import { useNavigate } from 'react-router-dom';
 const BACKEND_URL =
   import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-href.onrender.com';
 
-const getImageUrl = (product) => {
-  if (product.image_url) return product.image_url;
-  if (!product.image) return null;
-  if (product.image.startsWith('http')) return product.image;
-  return `${BACKEND_URL}${product.image}`;
+const getImageUrl = (item) => {
+  if (item.image_url) return item.image_url;
+  if (!item.image) return null;
+  if (item.image.startsWith('http')) return item.image;
+  return `${BACKEND_URL}${item.image}`;
 };
 
 const CartDrawer = () => {
-  const {
-    cart, cartOpen, setCartOpen,
-    removeFromCart, updateQuantity,
-    totalItems, totalPrice,
-  } = useCart();
+  const { cart, cartOpen, setCartOpen, removeFromCart, updateQuantity, totalItems, totalPrice } = useCart();
   const navigate = useNavigate();
 
   if (!cartOpen) return null;
-
-  const handleCheckout = () => {
-    setCartOpen(false);
-    navigate('/cart');
-  };
 
   return (
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
         onClick={() => setCartOpen(false)}
       />
 
@@ -74,22 +65,11 @@ const CartDrawer = () => {
             cart.map((item) => {
               const imageUrl = getImageUrl(item);
               return (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-4 bg-gray-50 rounded-xl p-3"
-                >
-                  {/* Image */}
+                <div key={item.id} className="flex items-center gap-4 bg-gray-50 rounded-xl p-3">
                   <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
                     {imageUrl ? (
-                      <img
-                        src={imageUrl}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.style.display = 'none';
-                        }}
-                      />
+                      <img src={imageUrl} alt={item.name} className="w-full h-full object-cover"
+                        onError={(e) => { e.target.style.display = 'none'; }} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <ImageOff size={20} className="text-gray-300" />
@@ -97,44 +77,30 @@ const CartDrawer = () => {
                     )}
                   </div>
 
-                  {/* Info */}
                   <div className="flex-grow min-w-0">
-                    <p className="font-semibold text-gray-900 text-sm truncate">
-                      {item.name}
-                    </p>
-                    <p className="text-green-600 font-bold text-sm mt-0.5">
+                    <p className="font-semibold text-gray-900 text-sm truncate">{item.name}</p>
+                    <p className="text-green-600 font-bold text-sm">
                       KES {Number(item.price).toLocaleString()}
                     </p>
-
-                    {/* Quantity controls */}
-                    <div className="flex items-center gap-2 mt-2">
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition"
-                      >
-                        <Minus size={12} />
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition">
+                        <Minus size={11} />
                       </button>
-                      <span className="text-sm font-bold w-5 text-center">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition"
-                      >
-                        <Plus size={12} />
+                      <span className="text-sm font-bold w-5 text-center">{item.quantity}</span>
+                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition">
+                        <Plus size={11} />
                       </button>
                     </div>
                   </div>
 
-                  {/* Subtotal + remove */}
                   <div className="text-right flex-shrink-0">
                     <p className="text-sm font-bold text-gray-800">
                       KES {(Number(item.price) * item.quantity).toLocaleString()}
                     </p>
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="mt-2 text-red-400 hover:text-red-600 transition"
-                    >
+                    <button onClick={() => removeFromCart(item.id)}
+                      className="mt-1.5 text-red-400 hover:text-red-600 transition">
                       <Trash2 size={15} />
                     </button>
                   </div>
@@ -154,7 +120,7 @@ const CartDrawer = () => {
               </span>
             </div>
             <button
-              onClick={handleCheckout}
+              onClick={() => { setCartOpen(false); navigate('/cart'); }}
               className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition text-lg"
             >
               Proceed to Checkout

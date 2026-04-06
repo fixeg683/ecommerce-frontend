@@ -8,7 +8,7 @@ export const CartProvider = ({ children }) => {
   const [cartOpen, setCartOpen] = useState(false);
   const [paidProductIds, setPaidProductIds] = useState([]);
 
-  // Load paid products on mount
+  // Restore paid products on mount
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (token) {
@@ -20,9 +20,9 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product) => {
     setCart((prev) => {
-      const existing = prev.find((i) => i.id === product.id);
+      const existing = prev.find(i => i.id === product.id);
       if (existing) {
-        return prev.map((i) =>
+        return prev.map(i =>
           i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
@@ -32,21 +32,20 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = (productId) => {
-    setCart((prev) => prev.filter((i) => i.id !== productId));
+    setCart(prev => prev.filter(i => i.id !== productId));
   };
 
   const updateQuantity = (productId, qty) => {
     if (qty < 1) { removeFromCart(productId); return; }
-    setCart((prev) =>
-      prev.map((i) => i.id === productId ? { ...i, quantity: qty } : i)
-    );
+    setCart(prev => prev.map(i =>
+      i.id === productId ? { ...i, quantity: qty } : i
+    ));
   };
 
   const clearCart = () => setCart([]);
 
-  // Called after successful payment
-  const markProductsAsPaid = (productIds) => {
-    setPaidProductIds(prev => [...new Set([...prev, ...productIds])]);
+  const markProductsAsPaid = (ids) => {
+    setPaidProductIds(prev => [...new Set([...prev, ...ids])]);
   };
 
   const hasPaid = (productId) => paidProductIds.includes(productId);

@@ -4,24 +4,25 @@
 
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  background-color: #f9fafb; /* Light gray background for eCommerce feel */
+  background-color: #f9fafb;
 }
 
 body {
   margin: 0;
-  display: flex;
   min-width: 320px;
   min-height: 100vh;
+  /* display: flex removed — it was squashing the layout */
 }
 
-/* Custom Scrollbar for a premium look */
-::-webkit-scrollbar {
-  width: 8px;
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
 ::-webkit-scrollbar-thumb {
-  background: #10b981; /* Green-500 matching M-Pesa theme */
+  background: #10b981;
   border-radius: 10px;
 }
