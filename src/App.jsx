@@ -23,15 +23,22 @@ function AppLayout() {
 
       <main className={isAuthPage ? '' : 'flex-grow w-full px-6 py-8'}>
         <Routes>
+          {/* ✅ Public — anyone can browse products */}
+          <Route path="/" element={<Home />} />
+
+          {/* ✅ Public — auth pages */}
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={
-            <ProtectedRoute><Home /></ProtectedRoute>
-          } />
+
+          {/* 🔒 Protected — must be logged in to checkout */}
           <Route path="/cart" element={
-            <ProtectedRoute><Cart /></ProtectedRoute>
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
           } />
-          <Route path="*" element={<Navigate to="/signup" replace />} />
+
+          {/* Catch-all → home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 

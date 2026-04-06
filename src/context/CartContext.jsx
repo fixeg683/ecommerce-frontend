@@ -1,12 +1,23 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import api from '../api/axios';
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [paidProductIds, setPaidProductIds] = useState([]);
 
-  // Add item — increment qty if already in cart
+  // Load paid products on mount
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      api.get('/my-paid-products/')
+        .then(res => setPaidProductIds(res.data))
+        .catch(() => {});
+    }
+  }, []);
+
   const addToCart = (product) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.id === product.id);
@@ -17,7 +28,7 @@ export const CartProvider = ({ children }) => {
       }
       return [...prev, { ...product, quantity: 1 }];
     });
-    setCartOpen(true); // open drawer on add
+    setCartOpen(true);
   };
 
   const removeFromCart = (productId) => {
@@ -33,6 +44,13 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => setCart([]);
 
+  // Called after successful payment
+  const markProductsAsPaid = (productIds) => {
+    setPaidProductIds(prev => [...new Set([...prev, ...productIds])]);
+  };
+
+  const hasPaid = (productId) => paidProductIds.includes(productId);
+
   const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
   const totalPrice = cart.reduce((sum, i) => sum + Number(i.price) * i.quantity, 0);
 
@@ -41,6 +59,7 @@ export const CartProvider = ({ children }) => {
       cart, cartOpen, setCartOpen,
       addToCart, removeFromCart, updateQuantity, clearCart,
       totalItems, totalPrice,
+      paidProductIds, markProductsAsPaid, hasPaid,
     }}>
       {children}
     </CartContext.Provider>
@@ -49,13 +68,12 @@ export const CartProvider = ({ children }) => {
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) {
-    return {
-      cart: [], cartOpen: false, setCartOpen: () => {},
-      addToCart: () => {}, removeFromCart: () => {},
-      updateQuantity: () => {}, clearCart: () => {},
-      totalItems: 0, totalPrice: 0,
-    };
-  }
+  if (!context) return {
+    cart: [], cartOpen: false, setCartOpen: () => {},
+    addToCart: () => {}, removeFromCart: () => {},
+    updateQuantity: () => {}, clearCart: () => {},
+    totalItems: 0, totalPrice: 0,
+    paidProductIds: [], markProductsAsPaid: () => {}, hasPaid: () => false,
+  };
   return context;
 };

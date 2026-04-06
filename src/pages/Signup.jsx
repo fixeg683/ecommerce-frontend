@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 function Signup() {
-  const { signup } = useAuth();
+  const { signup, login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = location.state?.from || '/';
+
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -20,10 +23,10 @@ function Signup() {
     setError('');
     try {
       await signup(formData.name, formData.email, formData.password);
-      // ✅ After signup, redirect to login to authenticate
-      navigate('/login');
+      // Auto-login after signup then redirect back
+      await login(formData.email, formData.password);
+      navigate(returnTo, { replace: true });
     } catch (err) {
-      // ✅ AuthContext now throws Error objects with .message
       setError(err.message || 'Signup failed. Please try again.');
     } finally {
       setLoading(false);
@@ -33,10 +36,16 @@ function Signup() {
   return (
     <div className="fixed inset-0 bg-gray-50 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-10 w-full max-w-md">
+
         <div className="text-center mb-8">
           <h1 className="text-4xl font-black text-green-600 mb-1">E-Space</h1>
           <p className="text-2xl font-extrabold text-gray-900 mt-4">Create Account</p>
           <p className="text-gray-500 text-sm mt-1">Join E-Space and start shopping</p>
+          {location.state?.from === '/cart' && (
+            <div className="mt-4 bg-amber-50 border border-amber-200 text-amber-700 text-sm rounded-lg px-4 py-2.5">
+              🔒 Create an account to complete your purchase
+            </div>
+          )}
         </div>
 
         {error && (
@@ -80,11 +89,16 @@ function Signup() {
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-gray-100 text-center">
+        <div className="mt-6 pt-6 border-t border-gray-100 text-center space-y-2">
           <p className="text-sm text-gray-500">
             Already have an account?{' '}
-            <Link to="/login" className="text-green-600 font-bold hover:underline">Login</Link>
+            <Link to="/login" state={{ from: returnTo }} className="text-green-600 font-bold hover:underline">
+              Login
+            </Link>
           </p>
+          <Link to="/" className="block text-sm text-gray-400 hover:text-green-600 transition">
+            ← Continue browsing without logging in
+          </Link>
         </div>
       </div>
     </div>
