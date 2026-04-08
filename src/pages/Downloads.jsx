@@ -35,11 +35,6 @@ export default function Downloads() {
             <br />
             {file.file ? (
               <a href={file.file} download style={{ color: "green", fontWeight: "bold" }}>
-              <a
-                href={file.file}
-                download
-                style={{ color: "green", fontWeight: "bold" }}
-              >
                 Download
               </a>
             ) : (
