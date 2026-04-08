@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from '../api'; // use configured axios instance
+import api from '../api';
 
 export default function Downloads() {
   const [files, setFiles] = useState([]);
