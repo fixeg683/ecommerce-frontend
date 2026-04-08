@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../api";
+import api from "../api"; // src/api/index.js will resolve it
 
 export default function Downloads() {
   const [files, setFiles] = useState([]);
