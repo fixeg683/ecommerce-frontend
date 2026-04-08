@@ -1,33 +1,40 @@
 import { useEffect, useState } from "react";
+import api from '../api'; // use configured axios instance
 
 export default function Downloads() {
   const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("https://your-backend-url/api/my-downloads/", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => setFiles(data))
-      .catch(err => console.error(err));
+    api.get('/my-paid-products/')
+      .then(res => setFiles(res.data))
+      .catch(err => console.error('Downloads error:', err))
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading) return <p style={{ padding: 20 }}>Loading your downloads...</p>;
 
   return (
     <div style={{ padding: "20px" }}>
       <h2>My Downloads</h2>
-
       {files.length === 0 ? (
-        <p>No purchased files yet.</p>
+        <p>No purchased files yet. Complete a payment to see your downloads here.</p>
       ) : (
         files.map(file => (
-          <div key={file.id} style={{ marginBottom: "10px" }}>
+          <div key={file.id} style={{ marginBottom: "16px", padding: "12px", border: "1px solid #ddd", borderRadius: "8px" }}>
             <strong>{file.name}</strong>
             <br />
-            <a href={`https://your-backend-url${file.download_url}`}>
-              Download
-            </a>
+            {file.file ? (
+              
+                href={file.file}
+                download
+                style={{ color: "green", fontWeight: "bold" }}
+              >
+                ⬇️ Download
+              </a>
+            ) : (
+              <span style={{ color: "gray" }}>File not available</span>
+            )}
           </div>
         ))
       )}

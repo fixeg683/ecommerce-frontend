@@ -1,48 +1,129 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import axios from 'axios';
+import api from '../api'; // use your configured axios instance, NOT localhost
 
 const Checkout = () => {
   const { cart, total } = useCart();
   const [phone, setPhone] = useState('254');
   const [loading, setLoading] = useState(false);
+  const [checkoutRequestID, setCheckoutRequestID] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState(null); // 'pending' | 'success' | 'failed'
 
   const handlePayment = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post('http://localhost:8000/api/pay/', 
-        { phone, amount: total },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      alert("Check your phone for the M-Pesa prompt!");
-    } catch (err) {
-      alert("Payment failed to initiate.");
+    const cleaned = phone.replace(/\s+/g, '');
+    if (!cleaned.startsWith('254') || cleaned.length !== 12) {
+      alert('Enter a valid Safaricom number e.g. 254712345678');
+      return;
     }
-    setLoading(false);
+
+    setLoading(true);
+    setPaymentStatus('pending');
+
+    try {
+      const productIds = cart.map(i => i.id);
+      const orderId = `ORD${Date.now()}`; // generate a temp order ID
+
+      const res = await api.post('/pay/', {
+        phone: cleaned,
+        amount: total,
+        order_id: orderId,
+        product_ids: productIds,
+      });
+
+      const reqID = res.data.CheckoutRequestID;
+      setCheckoutRequestID(reqID);
+      alert('📱 Check your phone for the M-Pesa prompt!');
+
+      // Poll for payment confirmation
+      pollPaymentStatus(reqID);
+
+    } catch (err) {
+      const detail = err.response?.data?.error || 'Payment failed to initiate.';
+      alert(detail);
+      setPaymentStatus('failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pollPaymentStatus = (reqID) => {
+    let attempts = 0;
+    const maxAttempts = 10; // poll for ~50 seconds
+
+    const interval = setInterval(async () => {
+      attempts++;
+      try {
+        const res = await api.post('/verify-payment/', { checkout_request_id: reqID });
+        const code = res.data.ResultCode;
+
+        if (code === 0 || code === '0') {
+          clearInterval(interval);
+          setPaymentStatus('success');
+        } else if (code !== undefined && code !== null) {
+          clearInterval(interval);
+          setPaymentStatus('failed');
+        }
+      } catch (e) {
+        console.log('Polling...', e);
+      }
+
+      if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        if (paymentStatus !== 'success') setPaymentStatus('failed');
+      }
+    }, 5000);
   };
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg">
       <h2 className="text-2xl font-bold mb-4">Checkout</h2>
+
       <div className="mb-4">
-        <p className="flex justify-between"><span>Items:</span> <span>{cart.length}</span></p>
-        <p className="flex justify-between font-bold text-xl"><span>Total:</span> <span>KES {total}</span></p>
+        <p className="flex justify-between"><span>Items:</span><span>{cart.length}</span></p>
+        <p className="flex justify-between font-bold text-xl"><span>Total:</span><span>KES {total}</span></p>
       </div>
-      <label className="block mb-2">M-Pesa Phone Number</label>
-      <input 
-        type="text" value={phone} 
-        onChange={(e) => setPhone(e.target.value)}
-        className="w-full border p-2 rounded mb-4" 
-        placeholder="2547XXXXXXXX"
-      />
-      <button 
-        onClick={handlePayment} disabled={loading}
-        className="w-full bg-green-500 text-white py-3 rounded-xl font-bold"
-      >
-        {loading ? "Processing..." : "Pay with M-Pesa"}
-      </button>
+
+      {paymentStatus === 'success' ? (
+        <div className="bg-green-100 p-4 rounded-xl text-center">
+          <p className="text-green-700 font-bold text-lg">✅ Payment Confirmed!</p>
+          
+            href="/downloads"
+            className="mt-3 block bg-green-500 text-white py-2 rounded-xl font-bold text-center"
+          >
+            Go to My Downloads
+          </a>
+        </div>
+      ) : (
+        <>
+          <label className="block mb-2">M-Pesa Phone Number</label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="w-full border p-2 rounded mb-4"
+            placeholder="2547XXXXXXXX"
+          />
+          <button
+            onClick={handlePayment}
+            disabled={loading}
+            className="w-full bg-green-500 text-white py-3 rounded-xl font-bold"
+          >
+            {loading
+              ? paymentStatus === 'pending'
+                ? '📱 Waiting for M-Pesa...'
+                : 'Processing...'
+              : 'Pay with M-Pesa'}
+          </button>
+
+          {paymentStatus === 'failed' && (
+            <p className="text-red-500 mt-2 text-center">
+              ❌ Payment failed or timed out. Please try again.
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 };
+
 export default Checkout;
