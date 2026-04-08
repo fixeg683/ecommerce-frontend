@@ -1,9 +1,9 @@
-import { useState, useContext } from 'react';
-import { CartContext } from '../context/CartContext';
+import { useState } from 'react';
+import { useCart } from '../context/CartContext';
 import api from '../api/axios';
 
 export default function Cart() {
-  const { cart, removeFromCart, clearCart, markProductsAsPaid } = useContext(CartContext);
+  const { cart, removeFromCart, clearCart, markProductsAsPaid } = useCart();
   const [phone, setPhone] = useState('');
   const [paying, setPaying] = useState(false);
   const [message, setMessage] = useState('');
