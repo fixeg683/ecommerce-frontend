@@ -9,10 +9,59 @@ export default function Cart() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
   const [paidOrder, setPaidOrder] = useState(null);
+  const [checkoutRequestID, setCheckoutRequestID] = useState(null);
+  const [polling, setPolling] = useState(false);
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+  const totalPrice = cart.reduce((sum, item) => sum + Number(item.price), 0);
 
-  // Replace the handleCheckout function in Cart.jsx with this:
+  const pollPaymentStatus = (reqID, paidItems, productIds) => {
+    setPolling(true);
+    let attempts = 0;
+    const maxAttempts = 12; // 60 seconds
+
+    const interval = setInterval(async () => {
+      attempts++;
+      try {
+        const res = await api.post('/verify-payment/', {
+          checkout_request_id: reqID,
+        });
+
+        const resultCode = res.data?.ResultCode;
+        console.log('[POLL] Verify result:', res.data);
+
+        if (resultCode === 0 || resultCode === '0') {
+          clearInterval(interval);
+          setPolling(false);
+          markProductsAsPaid(productIds);
+          setPaidOrder(paidItems);
+          clearCart();
+          setMessage('✅ Payment confirmed! Your downloads are ready.');
+          setMessageType('success');
+          return;
+        }
+
+        if (resultCode !== undefined && resultCode !== null &&
+            resultCode !== 0 && resultCode !== '0') {
+          clearInterval(interval);
+          setPolling(false);
+          setMessage(`❌ Payment failed: ${res.data?.ResultDesc || 'Try again.'}`);
+          setMessageType('error');
+          return;
+        }
+
+      } catch (e) {
+        console.log('[POLL] Attempt', attempts, e.message);
+      }
+
+      if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        setPolling(false);
+        setMessage('⏱ Payment timed out. If you paid, check Downloads in a few minutes.');
+        setMessageType('error');
+      }
+    }, 5000);
+  };
+
   const handleCheckout = async () => {
     const cleaned = phone.replace(/\s+/g, '');
     if (!cleaned.startsWith('254') || cleaned.length !== 12) {
@@ -35,17 +84,29 @@ export default function Cart() {
         product_ids: productIds,
       });
 
-      markProductsAsPaid(productIds);
-      setPaidOrder(paidItems);
-      clearCart();
-      setMessage('✅ Payment successful! Your downloads are ready below.');
+      console.log('[PAY] Response:', res.data);
+
+      const reqID = res.data?.CheckoutRequestID;
+      setCheckoutRequestID(reqID);
+      setMessage('📱 STK push sent! Enter your M-Pesa PIN on your phone...');
       setMessageType('success');
+
+      // Poll for real confirmation instead of assuming success
+      pollPaymentStatus(reqID, paidItems, productIds);
+
     } catch (err) {
+      console.error('[PAY] Error:', err.response?.data);
+
       const detail =
+        err.response?.data?.error ||
         err.response?.data?.detail ||
         err.response?.data?.message ||
-        'Payment failed. Please check your number and try again.';
-      setMessage(detail);
+        (typeof err.response?.data === 'object'
+          ? JSON.stringify(err.response.data)
+          : null) ||
+        'Payment failed. Please try again.';
+
+      setMessage(`❌ ${detail}`);
       setMessageType('error');
     } finally {
       setPaying(false);
@@ -56,7 +117,7 @@ export default function Cart() {
     return (
       <div className="max-w-2xl mx-auto p-6">
         <h2 className="text-2xl font-bold mb-6 text-green-600">🎉 Payment Successful!</h2>
-        <p className="mb-4 text-gray-700">Your downloads are ready. Check your Downloads page for access.</p>
+        <p className="mb-4 text-gray-700">Your downloads are ready.</p>
         <div className="space-y-4">
           {paidOrder.map((item) => (
             <div key={item.id} className="border rounded-lg p-4 bg-gray-50">
@@ -93,6 +154,7 @@ export default function Cart() {
                 <button
                   onClick={() => removeFromCart(item.id)}
                   className="text-red-600 hover:text-red-800"
+                  disabled={paying || polling}
                 >
                   Remove
                 </button>
@@ -118,24 +180,33 @@ export default function Cart() {
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="254712345678"
                 className="w-full p-3 border rounded-lg"
-                disabled={paying}
+                disabled={paying || polling}
               />
             </div>
 
             {message && (
-              <div className={`p-3 rounded-lg ${
-                messageType === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+              <div className={`p-3 rounded-lg text-sm ${
+                messageType === 'error'
+                  ? 'bg-red-100 text-red-700'
+                  : 'bg-green-100 text-green-700'
               }`}>
                 {message}
+                {polling && (
+                  <span className="ml-2 inline-block animate-pulse">
+                    Checking payment status...
+                  </span>
+                )}
               </div>
             )}
 
             <button
               onClick={handleCheckout}
-              disabled={paying || !phone.trim()}
+              disabled={paying || polling || !phone.trim()}
               className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {paying ? 'Processing...' : `Pay KSh ${totalPrice}`}
+              {paying ? 'Sending STK push...' :
+               polling ? 'Waiting for payment...' :
+               `Pay KSh ${totalPrice}`}
             </button>
           </div>
         </>
