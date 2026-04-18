@@ -1,18 +1,28 @@
-import axios from "axios";
+import api from '../lib/api'; // auth-configured axios instance
 
-const API = "/api/payments/";
-
-export const verifyPayment = (paymentId, orderId) => {
-  return axios.post(`${API}verify-payment/`, {
-    payment_id: paymentId,
-    order_id: orderId,
+/**
+ * Initiate M-Pesa STK Push
+ */
+export const initiatePay = (phone, amount, productIds) => {
+  return api.post('/api/pay/', {
+    phone,
+    amount,
+    product_ids: productIds,
   });
 };
 
-export const checkAccess = (productId) => {
-  return axios.get(`${API}check-access/${productId}/`);
+/**
+ * Poll M-Pesa for payment confirmation
+ */
+export const verifyPayment = (checkoutRequestId) => {
+  return api.post('/api/verify-payment/', {
+    checkout_request_id: checkoutRequestId,
+  });
 };
 
+/**
+ * Open the download URL for a purchased product
+ */
 export const downloadProduct = (productId) => {
-  window.open(`${API}download/${productId}/`);
+  window.open(`/api/download/${productId}/`, '_blank');
 };

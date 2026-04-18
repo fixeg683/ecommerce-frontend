@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import api from '../api'; // use your configured axios instance, NOT localhost
+import api from '../lib/api';
 
 const Checkout = () => {
   const { cart, total } = useCart();
@@ -21,12 +21,10 @@ const Checkout = () => {
 
     try {
       const productIds = cart.map(i => i.id);
-      const orderId = `ORD${Date.now()}`; // generate a temp order ID
 
-      const res = await api.post('/pay/', {
+      const res = await api.post('/api/pay/', {
         phone: cleaned,
         amount: total,
-        order_id: orderId,
         product_ids: productIds,
       });
 
@@ -34,7 +32,6 @@ const Checkout = () => {
       setCheckoutRequestID(reqID);
       alert('📱 Check your phone for the M-Pesa prompt!');
 
-      // Poll for payment confirmation
       pollPaymentStatus(reqID);
 
     } catch (err) {
@@ -48,12 +45,12 @@ const Checkout = () => {
 
   const pollPaymentStatus = (reqID) => {
     let attempts = 0;
-    const maxAttempts = 10; // poll for ~50 seconds
+    const maxAttempts = 10; // poll every 5s for ~50 seconds
 
     const interval = setInterval(async () => {
       attempts++;
       try {
-        const res = await api.post('/verify-payment/', { checkout_request_id: reqID });
+        const res = await api.post('/api/verify-payment/', { checkout_request_id: reqID });
         const code = res.data.ResultCode;
 
         if (code === 0 || code === '0') {
@@ -69,7 +66,7 @@ const Checkout = () => {
 
       if (attempts >= maxAttempts) {
         clearInterval(interval);
-        if (paymentStatus !== 'success') setPaymentStatus('failed');
+        setPaymentStatus(prev => prev !== 'success' ? 'failed' : prev);
       }
     }, 5000);
   };
@@ -86,7 +83,7 @@ const Checkout = () => {
       {paymentStatus === 'success' ? (
         <div className="bg-green-100 p-4 rounded-xl text-center">
           <p className="text-green-700 font-bold text-lg">✅ Payment Confirmed!</p>
-          
+          <a
             href="/downloads"
             className="mt-3 block bg-green-500 text-white py-2 rounded-xl font-bold text-center"
           >
