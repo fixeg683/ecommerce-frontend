@@ -10,7 +10,7 @@ function Signup() {
   const returnTo = location.state?.from || '/';
 
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: ''
   });
@@ -19,10 +19,7 @@ function Signup() {
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -31,11 +28,11 @@ function Signup() {
     setError('');
 
     try {
-      // ✅ SIGNUP
-      await signup(formData.name, formData.email, formData.password);
+      // 1. Register the account
+      await signup(formData.username, formData.email, formData.password);
 
-      // ✅ LOGIN AFTER SIGNUP (IMPORTANT FIX: use username)
-      await login(formData.name, formData.password);
+      // 2. Immediately log in with the same username + password
+      await login(formData.username, formData.password);
 
       navigate(returnTo, { replace: true });
     } catch (err) {
@@ -63,14 +60,15 @@ function Signup() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-          {/* NAME */}
+          {/* USERNAME */}
           <input
             type="text"
-            name="name"
+            name="username"
             placeholder="Username"
+            value={formData.username}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border rounded-lg"
+            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
           />
 
           {/* EMAIL */}
@@ -78,9 +76,10 @@ function Signup() {
             type="email"
             name="email"
             placeholder="Email"
+            value={formData.email}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border rounded-lg"
+            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
           />
 
           {/* PASSWORD */}
@@ -88,26 +87,25 @@ function Signup() {
             type="password"
             name="password"
             placeholder="Password"
+            value={formData.password}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border rounded-lg"
+            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="bg-green-600 text-white py-3 rounded-lg font-bold flex justify-center items-center gap-2"
+            className="bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white py-3 rounded-lg font-bold flex justify-center items-center gap-2 transition"
           >
             {loading && <Loader2 size={18} className="animate-spin" />}
-            {loading ? 'Creating...' : 'Sign Up'}
+            {loading ? 'Creating account…' : 'Sign Up'}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm">
           Already have an account?{' '}
-          <Link to="/login" className="text-green-600 font-bold">
-            Login
-          </Link>
+          <Link to="/login" className="text-green-600 font-bold">Login</Link>
         </p>
 
       </div>
