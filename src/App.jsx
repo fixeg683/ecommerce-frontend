@@ -16,7 +16,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Cart from './pages/Cart';
 import Downloads from './pages/Downloads';
-import PaymentSuccess from './pages/PaymentSuccess'; // ✅ NEW
+import PaymentSuccess from './pages/PaymentSuccess';
 
 // Toast
 import { ToastContainer } from 'react-toastify';
@@ -30,17 +30,20 @@ function AppLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 w-full">
-      
-      {/* Toast Notifications (GLOBAL) */}
+
+      {/* Toast Notifications — z-index 9999 ensures it renders above everything */}
       <ToastContainer
         position="top-right"
-        autoClose={3000}
+        autoClose={5000}
+        hideProgressBar={false}
         newestOnTop
         closeOnClick
         pauseOnHover
+        draggable
+        limit={5}
+        style={{ zIndex: 9999 }}
       />
 
-      {/* Navbar & Cart Drawer */}
       {!isAuthPage && <Navbar />}
       {!isAuthPage && <CartDrawer />}
 
@@ -52,12 +55,10 @@ function AppLayout() {
         }
       >
         <Routes>
-          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
 
-          {/* ✅ Payment Success Route */}
           <Route
             path="/payment-success"
             element={
@@ -66,8 +67,6 @@ function AppLayout() {
               </ProtectedRoute>
             }
           />
-
-          {/* Protected Routes */}
           <Route
             path="/cart"
             element={
@@ -76,7 +75,6 @@ function AppLayout() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/downloads"
             element={
@@ -86,12 +84,10 @@ function AppLayout() {
             }
           />
 
-          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 
-      {/* Footer */}
       {!isAuthPage && (
         <footer className="py-4 text-center text-gray-400 text-xs border-t bg-white">
           &copy; 2026 E-Space Marketplace
