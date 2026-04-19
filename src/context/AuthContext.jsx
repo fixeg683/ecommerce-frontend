@@ -27,20 +27,24 @@ export const AuthProvider = ({ children }) => {
         setAuthLoading(false);
     }, []);
 
-    const login = async (email, password) => {
+    const login = async (username, password) => {
         try {
+            // /api/token/ expects { username, password }
             const res = await axios.post(`${BACKEND_URL}/api/token/`, {
-                username: email,
+                username,   // must be the actual username, NOT email
                 password,
             });
             const { access, refresh } = res.data;
             if (!access) throw new Error('No access token returned');
+
             localStorage.setItem('access_token', access);
             localStorage.setItem('refresh_token', refresh);
-            const userData = { email };
+
+            const userData = { username };
             localStorage.setItem('user', JSON.stringify(userData));
             setToken(access);
             setUser(userData);
+
             return { success: true, user: userData };
         } catch (error) {
             if (error.response) {
@@ -54,13 +58,13 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const signup = async (name, email, password) => {
+    const signup = async (username, email, password) => {
         try {
+            // Register with username (not email) as the unique identifier
             await axios.post(`${BACKEND_URL}/api/register/`, {
-                username: email,
+                username,   // the chosen username
                 email,
                 password,
-                first_name: name,
             });
             return { success: true };
         } catch (error) {
@@ -91,8 +95,7 @@ export const AuthProvider = ({ children }) => {
             user, token, login, signup, logout,
             authLoading,
             isAuthenticated,
-            // keep 'loading' alias so old code doesn't break
-            loading: authLoading,
+            loading: authLoading, // alias for legacy usage
         }}>
             {children}
         </AuthContext.Provider>
