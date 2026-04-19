@@ -8,14 +8,21 @@ export const CartProvider = ({ children }) => {
   const [cartOpen, setCartOpen] = useState(false);
   const [paidProductIds, setPaidProductIds] = useState([]);
 
-  // Restore paid products on mount
+  // On mount, restore which products the user has already paid for
+  // Uses /orders/my-orders/ which exists and returns { order_id, is_paid, product: { id, ... } }
   useEffect(() => {
     const token = localStorage.getItem('access_token');
-    if (token) {
-      api.get('/my-paid-products/')
-        .then(res => setPaidProductIds(res.data))
-        .catch(() => {});
-    }
+    if (!token) return;
+
+    api.get('/orders/my-orders/')
+      .then(res => {
+        const ids = res.data
+          .filter(o => o.is_paid)
+          .map(o => o.product?.id)
+          .filter(Boolean);
+        setPaidProductIds(ids);
+      })
+      .catch(() => {}); // silently ignore — user may not have orders yet
   }, []);
 
   const addToCart = (product) => {
@@ -44,14 +51,15 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => setCart([]);
 
+  // Called after successful payment to immediately unlock files in-session
   const markProductsAsPaid = (ids) => {
     setPaidProductIds(prev => [...new Set([...prev, ...ids])]);
   };
 
   const hasPaid = (productId) => paidProductIds.includes(productId);
 
-  const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
-  const totalPrice = cart.reduce((sum, i) => sum + Number(i.price) * i.quantity, 0);
+  const totalItems = cart.reduce((sum, i) => sum + (i.quantity || 1), 0);
+  const totalPrice = cart.reduce((sum, i) => sum + Number(i.price) * (i.quantity || 1), 0);
 
   return (
     <CartContext.Provider value={{
