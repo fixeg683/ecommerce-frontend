@@ -90,7 +90,7 @@ function AppLayout() {
 
       {!isAuthPage && (
         <footer className="py-4 text-center text-gray-400 text-xs border-t bg-white">
-          &copy; 2026 Nexusmal Marketplace
+          &copy; 2026 Nexusmall Marketplace
         </footer>
       )}
     </div>
