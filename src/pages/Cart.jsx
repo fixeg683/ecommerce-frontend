@@ -1,16 +1,14 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import api from '../api/axios';
+import { showSuccess, showError, showInfo } from '../utils/toast';
 
 export default function Cart() {
   const { cart, removeFromCart, clearCart, markProductsAsPaid } = useCart();
   const [phone, setPhone] = useState('');
   const [paying, setPaying] = useState(false);
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState('');
-  const [paidOrder, setPaidOrder] = useState(null);
-  const [checkoutRequestID, setCheckoutRequestID] = useState(null);
   const [polling, setPolling] = useState(false);
+  const [paidOrder, setPaidOrder] = useState(null);
 
   const totalPrice = cart.reduce((sum, item) => sum + Number(item.price), 0);
 
@@ -26,26 +24,23 @@ export default function Cart() {
           checkout_request_id: reqID,
         });
 
-        const resultCode = res.data?.ResultCode;
+        const resultCode = String(res.data?.ResultCode ?? '');
         console.log('[POLL] Verify result:', res.data);
 
-        if (resultCode === 0 || resultCode === '0') {
+        if (resultCode === '0') {
           clearInterval(interval);
           setPolling(false);
           markProductsAsPaid(productIds);
           setPaidOrder(paidItems);
           clearCart();
-          setMessage('✅ Payment confirmed! Your downloads are ready.');
-          setMessageType('success');
+          showSuccess('✅ Payment confirmed! Your downloads are now unlocked.');
           return;
         }
 
-        if (resultCode !== undefined && resultCode !== null &&
-            resultCode !== 0 && resultCode !== '0') {
+        if (resultCode !== '') {
           clearInterval(interval);
           setPolling(false);
-          setMessage(`❌ Payment failed: ${res.data?.ResultDesc || 'Try again.'}`);
-          setMessageType('error');
+          showError(`❌ Payment failed: ${res.data?.ResultDesc || 'Please try again.'}`);
           return;
         }
 
@@ -56,8 +51,7 @@ export default function Cart() {
       if (attempts >= maxAttempts) {
         clearInterval(interval);
         setPolling(false);
-        setMessage('⏱ Payment timed out. If you paid, check Downloads in a few minutes.');
-        setMessageType('error');
+        showError('⏱ Payment timed out. If you paid, check Downloads in a few minutes.');
       }
     }, 5000);
   };
@@ -65,14 +59,12 @@ export default function Cart() {
   const handleCheckout = async () => {
     const cleaned = phone.replace(/\s+/g, '');
     if (!cleaned.startsWith('254') || cleaned.length !== 12) {
-      setMessage('Enter a valid Safaricom number starting with 254 (e.g. 254712345678)');
-      setMessageType('error');
+      showError('Enter a valid Safaricom number starting with 254 (e.g. 254712345678)');
       return;
     }
 
     setPaying(true);
-    setMessage('📱 Sending STK push to your phone...');
-    setMessageType('success');
+    showInfo('📱 Sending STK push to your phone…');
 
     try {
       const productIds = cart.map(i => i.id);
@@ -87,11 +79,8 @@ export default function Cart() {
       console.log('[PAY] Response:', res.data);
 
       const reqID = res.data?.CheckoutRequestID;
-      setCheckoutRequestID(reqID);
-      setMessage('📱 STK push sent! Enter your M-Pesa PIN on your phone...');
-      setMessageType('success');
+      showSuccess('📱 STK push sent! Enter your M-Pesa PIN on your phone…');
 
-      // Poll for real confirmation instead of assuming success
       pollPaymentStatus(reqID, paidItems, productIds);
 
     } catch (err) {
@@ -106,8 +95,7 @@ export default function Cart() {
           : null) ||
         'Payment failed. Please try again.';
 
-      setMessage(`❌ ${detail}`);
-      setMessageType('error');
+      showError(`❌ ${detail}`);
     } finally {
       setPaying(false);
     }
@@ -153,7 +141,7 @@ export default function Cart() {
                 </div>
                 <button
                   onClick={() => removeFromCart(item.id)}
-                  className="text-red-600 hover:text-red-800"
+                  className="text-red-500 hover:text-red-700 font-medium transition"
                   disabled={paying || polling}
                 >
                   Remove
@@ -165,7 +153,7 @@ export default function Cart() {
           <div className="border-t pt-4 mb-6">
             <div className="flex justify-between text-lg font-semibold">
               <span>Total:</span>
-              <span>KSh {totalPrice}</span>
+              <span>KSh {totalPrice.toLocaleString()}</span>
             </div>
           </div>
 
@@ -179,34 +167,25 @@ export default function Cart() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="254712345678"
-                className="w-full p-3 border rounded-lg"
+                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                 disabled={paying || polling}
               />
             </div>
 
-            {message && (
-              <div className={`p-3 rounded-lg text-sm ${
-                messageType === 'error'
-                  ? 'bg-red-100 text-red-700'
-                  : 'bg-green-100 text-green-700'
-              }`}>
-                {message}
-                {polling && (
-                  <span className="ml-2 inline-block animate-pulse">
-                    Checking payment status...
-                  </span>
-                )}
-              </div>
+            {polling && (
+              <p className="text-yellow-600 text-sm animate-pulse text-center">
+                ⏳ Waiting for M-Pesa confirmation…
+              </p>
             )}
 
             <button
               onClick={handleCheckout}
               disabled={paying || polling || !phone.trim()}
-              className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-bold transition"
             >
-              {paying ? 'Sending STK push...' :
-               polling ? 'Waiting for payment...' :
-               `Pay KSh ${totalPrice}`}
+              {paying ? 'Sending STK push…' :
+               polling ? 'Waiting for payment…' :
+               `Pay KSh ${totalPrice.toLocaleString()}`}
             </button>
           </div>
         </>

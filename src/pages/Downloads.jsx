@@ -5,10 +5,11 @@ import { showSuccess, showError } from '../utils/toast';
 const Downloads = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [downloading, setDownloading] = useState(null); // track which product is downloading
+  const [downloading, setDownloading] = useState(null);
 
   const fetchDownloads = async () => {
     try {
+      // Returns [{ order_id, is_paid, product: { id, name, description, price, image } }]
       const res = await api.get('/orders/my-orders/');
       setOrders(res.data);
     } catch (err) {
@@ -26,21 +27,21 @@ const Downloads = () => {
   const handleDownload = async (productId, productName) => {
     setDownloading(productId);
     try {
+      // GET /api/download/{id}/ → { download_url: "https://cloudinary..." }
       const res = await api.get(`/download/${productId}/`);
-      const url = res.data.download_url;
+      const url = res.data?.download_url;
 
       if (!url) {
-        showError('No file found for this product.');
+        showError('No file found for this product. Contact support.');
         return;
       }
 
-      // Open file in new tab — works for Cloudinary URLs too
       window.open(url, '_blank');
       showSuccess(`⬇️ Downloading "${productName}"…`);
 
     } catch (err) {
       if (err.response?.status === 403) {
-        showError('You need to purchase this product to download it.');
+        showError('Purchase required to download this product.');
       } else if (err.response?.status === 404) {
         showError('File not available yet. Contact support.');
       } else {
@@ -99,10 +100,9 @@ const Downloads = () => {
                   alt={product.name}
                   className={`w-full h-40 object-cover rounded-lg transition ${!isUnlocked ? 'opacity-40 grayscale' : ''}`}
                 />
-                {/* Lock overlay for unpaid items */}
                 {!isUnlocked && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-3xl">🔒</span>
+                    <span className="text-4xl">🔒</span>
                   </div>
                 )}
               </div>
@@ -118,13 +118,9 @@ const Downloads = () => {
                 <span className="text-green-600 font-bold">
                   KES {Number(product.price).toLocaleString()}
                 </span>
-                <span
-                  className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    isUnlocked
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-red-100 text-red-600'
-                  }`}
-                >
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                  isUnlocked ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
+                }`}>
                   {isUnlocked ? '✅ Unlocked' : '🔒 Locked'}
                 </span>
               </div>
@@ -144,11 +140,7 @@ const Downloads = () => {
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Preparing…
                   </>
-                ) : isUnlocked ? (
-                  '⬇️ Download'
-                ) : (
-                  'Purchase Required'
-                )}
+                ) : isUnlocked ? '⬇️ Download' : 'Purchase Required'}
               </button>
             </div>
           );

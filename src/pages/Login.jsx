@@ -46,7 +46,7 @@ function Login() {
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-10 w-full max-w-md">
 
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-black text-green-600">E-Space</h1>
+          <h1 className="text-4xl font-black text-green-600">Nexusmal</h1>
           <p className="text-2xl font-bold mt-4">Welcome Back</p>
         </div>
 

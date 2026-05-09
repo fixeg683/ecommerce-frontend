@@ -74,7 +74,7 @@ const Home = () => {
               {activeCategory === 'All' ? 'Explore Products' : activeCategory}
             </h1>
             <p className="text-gray-400 text-sm mt-0.5">
-              {activeCategory === 'All' ? 'Discover the best deals on E-Space' : `Browsing ${activeCategory.toLowerCase()}`}
+              {activeCategory === 'All' ? 'Discover the best deals on Nexusmal' : `Browsing ${activeCategory.toLowerCase()}`}
             </p>
           </div>
         </div>
