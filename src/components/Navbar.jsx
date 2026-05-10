@@ -47,7 +47,7 @@ const Navbar = () => {
 
           {/* Logo */}
           <Link to="/" className="text-2xl font-black text-green-600 tracking-tighter">
-            Nexusmal
+            Nexusmall
           </Link>
 
           <div className="flex items-center gap-6">
