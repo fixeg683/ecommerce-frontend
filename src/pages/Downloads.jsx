@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import { showSuccess, showError } from '../utils/toast';
 
@@ -6,6 +7,8 @@ const Downloads = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(null);
+  const [justUnlocked, setJustUnlocked] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const fetchDownloads = async () => {
     try {
@@ -21,13 +24,19 @@ const Downloads = () => {
   };
 
   useEffect(() => {
+    // Detect redirect from successful payment
+    if (searchParams.get('unlocked') === '1') {
+      setJustUnlocked(true);
+      showSuccess('✅ Payment confirmed! Your downloads are now unlocked.');
+      // Clean the URL without re-mounting
+      setSearchParams({}, { replace: true });
+    }
     fetchDownloads();
   }, []);
 
   const handleDownload = async (productId, productName) => {
     setDownloading(productId);
     try {
-      // GET /api/download/{id}/ → { download_url: "https://cloudinary..." }
       const res = await api.get(`/download/${productId}/`);
       const url = res.data?.download_url;
 
@@ -36,7 +45,16 @@ const Downloads = () => {
         return;
       }
 
-      window.open(url, '_blank');
+      // Use a hidden anchor to trigger a real file download
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = productName || 'download';
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
       showSuccess(`⬇️ Downloading "${productName}"…`);
 
     } catch (err) {
@@ -82,6 +100,16 @@ const Downloads = () => {
     <div className="max-w-6xl mx-auto px-4">
       <h1 className="text-2xl font-bold mb-6">My Downloads</h1>
 
+      {justUnlocked && (
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+          <span className="text-2xl">🎉</span>
+          <div>
+            <p className="font-semibold text-green-800">Payment successful!</p>
+            <p className="text-sm text-green-600">Your files are unlocked and ready to download below.</p>
+          </div>
+        </div>
+      )}
+
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {orders.map((order, index) => {
           const product = order.product;
@@ -118,9 +146,8 @@ const Downloads = () => {
                 <span className="text-green-600 font-bold">
                   KES {Number(product.price).toLocaleString()}
                 </span>
-                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                  isUnlocked ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
-                }`}>
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${isUnlocked ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
+                  }`}>
                   {isUnlocked ? '✅ Unlocked' : '🔒 Locked'}
                 </span>
               </div>
@@ -129,11 +156,10 @@ const Downloads = () => {
               <button
                 disabled={!isUnlocked || isDownloading}
                 onClick={() => handleDownload(product.id, product.name)}
-                className={`w-full mt-4 py-2 rounded-lg font-medium transition flex items-center justify-center gap-2 ${
-                  isUnlocked
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
+                className={`w-full mt-4 py-2 rounded-lg font-medium transition flex items-center justify-center gap-2 ${isUnlocked
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
               >
                 {isDownloading ? (
                   <>

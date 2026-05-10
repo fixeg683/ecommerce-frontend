@@ -8,7 +8,6 @@ export default function Cart() {
   const [phone, setPhone] = useState('');
   const [paying, setPaying] = useState(false);
   const [polling, setPolling] = useState(false);
-  const [paidOrder, setPaidOrder] = useState(null);
 
   const totalPrice = cart.reduce((sum, item) => sum + Number(item.price), 0);
 
@@ -25,19 +24,21 @@ export default function Cart() {
         });
 
         const resultCode = String(res.data?.ResultCode ?? '');
+        const confirmed = res.data?.confirmed === true;
         console.log('[POLL] Verify result:', res.data);
 
-        if (resultCode === '0') {
+        if (confirmed) {
           clearInterval(interval);
           setPolling(false);
           markProductsAsPaid(productIds);
-          setPaidOrder(paidItems);
           clearCart();
-          showSuccess('✅ Payment confirmed! Your downloads are now unlocked.');
+          // Hard navigate so Downloads page re-mounts and re-fetches fresh from DB
+          window.location.href = '/downloads?unlocked=1';
           return;
         }
 
-        if (resultCode !== '') {
+        // Non-empty ResultCode that isn't 0 means a definite failure (e.g. cancelled, wrong PIN)
+        if (resultCode !== '' && resultCode !== '0') {
           clearInterval(interval);
           setPolling(false);
           showError(`❌ Payment failed: ${res.data?.ResultDesc || 'Please try again.'}`);
@@ -79,6 +80,12 @@ export default function Cart() {
       console.log('[PAY] Response:', res.data);
 
       const reqID = res.data?.CheckoutRequestID;
+
+      if (!reqID) {
+        showError('❌ Failed to get payment reference. Please try again.');
+        return;
+      }
+
       showSuccess('📱 STK push sent! Enter your M-Pesa PIN on your phone…');
 
       pollPaymentStatus(reqID, paidItems, productIds);
@@ -100,29 +107,6 @@ export default function Cart() {
       setPaying(false);
     }
   };
-
-  if (paidOrder) {
-    return (
-      <div className="max-w-2xl mx-auto p-6">
-        <h2 className="text-2xl font-bold mb-6 text-green-600">🎉 Payment Successful!</h2>
-        <p className="mb-4 text-gray-700">Your downloads are ready.</p>
-        <div className="space-y-4">
-          {paidOrder.map((item) => (
-            <div key={item.id} className="border rounded-lg p-4 bg-gray-50">
-              <h3 className="font-semibold">{item.name}</h3>
-              <p className="text-sm text-gray-600">KSh {item.price}</p>
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={() => window.location.href = '/downloads'}
-          className="mt-6 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
-        >
-          Go to Downloads
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -184,8 +168,8 @@ export default function Cart() {
               className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-bold transition"
             >
               {paying ? 'Sending STK push…' :
-               polling ? 'Waiting for payment…' :
-               `Pay KSh ${totalPrice.toLocaleString()}`}
+                polling ? 'Waiting for payment…' :
+                  `Pay KSh ${totalPrice.toLocaleString()}`}
             </button>
           </div>
         </>
