@@ -63,8 +63,8 @@ const Checkout = () => {
 
           showSuccess('✅ Payment confirmed! Your files are now unlocked.');
 
-          // Navigate to downloads after a short delay so user sees the toast
-          setTimeout(() => navigate('/downloads'), 2000);
+          // Navigate to the success page so user sees the confirmation screen
+          setTimeout(() => navigate('/payment-success'), 1500);
 
         } else if (code !== '') {
           clearInterval(interval);
