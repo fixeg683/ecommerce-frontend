@@ -5,10 +5,9 @@ import api from '../api/axios';
 import { showSuccess, showError } from '../utils/toast';
 
 const Checkout = () => {
-  const { cart, totalPrice, clearCart, markProductsAsPaid } = useCart();
+  const { cart, totalPrice } = useCart();
   const [phone, setPhone] = useState('254');
   const [loading, setLoading] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState(null); // null | 'pending' | 'success' | 'failed'
   const navigate = useNavigate();
 
   const handlePayment = async () => {
@@ -19,7 +18,6 @@ const Checkout = () => {
     }
 
     setLoading(true);
-    setPaymentStatus('pending');
 
     try {
       const productIds = cart.map(i => i.id);
@@ -30,65 +28,28 @@ const Checkout = () => {
         product_ids: productIds,
       });
 
-      const reqID = res.data.CheckoutRequestID;
+      const checkoutRequestId = res.data.CheckoutRequestID;
+      if (!checkoutRequestId) {
+        showError('No checkout ID returned. Please try again.');
+        return;
+      }
+
       showSuccess('📱 M-Pesa prompt sent! Check your phone.');
-      pollPaymentStatus(reqID, productIds);
+
+      // Hand off ALL polling to PaymentSuccess page
+      navigate(
+        `/payment-success?checkout_request_id=${encodeURIComponent(checkoutRequestId)}&product_ids=${encodeURIComponent(JSON.stringify(productIds))}`
+      );
 
     } catch (err) {
       const detail = err.response?.data?.error || 'Payment failed to initiate.';
       showError(detail);
-      setPaymentStatus('failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const pollPaymentStatus = (reqID, productIds) => {
-    let attempts = 0;
-    const maxAttempts = 10; // poll every 5s for ~50s
-
-    const interval = setInterval(async () => {
-      attempts++;
-      try {
-        const res = await api.post('/verify-payment/', { checkout_request_id: reqID });
-        const code = String(res.data.ResultCode ?? '');
-
-        if (code === '0') {
-          clearInterval(interval);
-          setPaymentStatus('success');
-
-          // Unlock files in cart context immediately (no page reload needed)
-          markProductsAsPaid(productIds);
-          clearCart();
-
-          showSuccess('✅ Payment confirmed! Your files are now unlocked.');
-
-          // Navigate to the success page so user sees the confirmation screen
-          setTimeout(() => navigate('/payment-success'), 1500);
-
-        } else if (code !== '') {
-          clearInterval(interval);
-          setPaymentStatus('failed');
-          showError('❌ Payment was not completed. Please try again.');
-        }
-      } catch (e) {
-        console.log('Polling attempt', attempts, e);
-      }
-
-      if (attempts >= maxAttempts) {
-        clearInterval(interval);
-        setPaymentStatus(prev => {
-          if (prev !== 'success') {
-            showError('⏱ Payment timed out. If you paid, check My Downloads in a moment.');
-            return 'failed';
-          }
-          return prev;
-        });
-      }
-    }, 5000);
-  };
-
-  if (!cart.length && paymentStatus !== 'success') {
+  if (!cart.length) {
     return (
       <div className="text-center py-20 text-gray-500">
         <p className="text-lg">Your cart is empty.</p>
@@ -115,56 +76,25 @@ const Checkout = () => {
         </div>
       </div>
 
-      {paymentStatus === 'success' ? (
-        <div className="bg-green-50 border border-green-200 p-5 rounded-xl text-center">
-          <p className="text-green-700 font-bold text-lg mb-1">✅ Payment Confirmed!</p>
-          <p className="text-green-600 text-sm mb-4">Redirecting you to downloads…</p>
-          <a
-            href="/downloads"
-            className="block bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold transition"
-          >
-            Go to My Downloads
-          </a>
-        </div>
-      ) : (
-        <>
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            M-Pesa Phone Number
-          </label>
-          <input
-            type="tel"
-            value={phone}
-            onChange={e => setPhone(e.target.value)}
-            className="w-full border p-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-green-400"
-            placeholder="2547XXXXXXXX"
-            disabled={loading}
-          />
+      <label className="block mb-1 text-sm font-medium text-gray-700">
+        M-Pesa Phone Number
+      </label>
+      <input
+        type="tel"
+        value={phone}
+        onChange={e => setPhone(e.target.value)}
+        className="w-full border p-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-green-400"
+        placeholder="2547XXXXXXXX"
+        disabled={loading}
+      />
 
-          <button
-            onClick={handlePayment}
-            disabled={loading}
-            className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-xl font-bold transition"
-          >
-            {loading
-              ? paymentStatus === 'pending'
-                ? '📱 Waiting for M-Pesa…'
-                : 'Processing…'
-              : 'Pay with M-Pesa'}
-          </button>
-
-          {paymentStatus === 'pending' && (
-            <p className="text-yellow-600 text-sm mt-3 text-center animate-pulse">
-              ⏳ Waiting for payment confirmation…
-            </p>
-          )}
-
-          {paymentStatus === 'failed' && (
-            <p className="text-red-500 text-sm mt-3 text-center">
-              ❌ Payment failed or timed out. Please try again.
-            </p>
-          )}
-        </>
-      )}
+      <button
+        onClick={handlePayment}
+        disabled={loading}
+        className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-xl font-bold transition"
+      >
+        {loading ? 'Sending M-Pesa prompt…' : 'Pay with M-Pesa'}
+      </button>
     </div>
   );
 };

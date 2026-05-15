@@ -5,21 +5,20 @@ import { useCart } from '../context/CartContext';
 import { showSuccess, showError } from '../utils/toast';
 
 const POLL_INTERVAL_MS = 5000;
-const MAX_ATTEMPTS = 10;
+const MAX_ATTEMPTS = 12; // 60 seconds total
 
 const PaymentSuccess = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { markProductsAsPaid, clearCart } = useCart();
 
-  // status: 'verifying' | 'success' | 'failed' | 'timeout'
   const [status, setStatus] = useState('verifying');
   const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
     const checkoutRequestId = params.get('checkout_request_id');
 
-    // No checkout_request_id → arrived here after Checkout.jsx already confirmed
+    // No checkout_request_id means we arrived here after already-confirmed payment
     if (!checkoutRequestId) {
       setStatus('success');
       return;
@@ -39,6 +38,7 @@ const PaymentSuccess = () => {
 
         const code = String(res.data?.ResultCode ?? '');
 
+        // Success
         if (code === '0') {
           stopped = true;
           const rawIds = params.get('product_ids');
@@ -49,24 +49,29 @@ const PaymentSuccess = () => {
               clearCart();
             } catch (_) { }
           }
-          showSuccess('🎉 Payment confirmed! Your files are unlocked.');
+          showSuccess('Payment confirmed! Your files are unlocked.');
           setStatus('success');
           return;
         }
 
-        if (code !== '') {
+        // Still pending — "pending" string or empty means keep polling
+        if (code === 'pending' || code === '') {
+          // keep polling
+        } else {
+          // A real non-zero numeric code = definite failure
           stopped = true;
-          showError('❌ Payment was not completed. Please try again.');
+          showError('Payment was not completed. Please try again.');
           setStatus('failed');
           return;
         }
+
       } catch (e) {
         console.warn('Polling attempt', attempts, e);
+        // network error — keep trying
       }
 
       if (attempts >= MAX_ATTEMPTS) {
         stopped = true;
-        showError('⏱ Payment timed out. If you paid, check Downloads in a moment.');
         setStatus('timeout');
         return;
       }
@@ -99,7 +104,7 @@ const PaymentSuccess = () => {
             Please wait while we confirm your M-Pesa transaction…
           </p>
           <p className="text-gray-400 text-xs mt-4 animate-pulse">
-            This may take up to 30 seconds
+            This may take up to 60 seconds
           </p>
         </div>
       </div>
@@ -119,10 +124,7 @@ const PaymentSuccess = () => {
               </svg>
             </div>
           </div>
-
-          <h1 className="text-2xl font-extrabold text-gray-900 mb-2">
-            Payment Successful! 🎉
-          </h1>
+          <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Payment Successful!</h1>
           <p className="text-gray-500 text-sm mb-1">
             Your purchase is confirmed. Your files are now unlocked and ready to download.
           </p>
@@ -130,19 +132,14 @@ const PaymentSuccess = () => {
             Redirecting to downloads in{' '}
             <span className="font-bold text-green-700">{countdown}s</span>…
           </p>
-
           <Link to="/downloads"
             className="block w-full bg-green-500 hover:bg-green-600 active:scale-95 transition-all text-white font-bold py-3 rounded-xl mb-3">
-            🚀 Go to My Downloads
+            Go to My Downloads
           </Link>
           <Link to="/"
             className="block w-full border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-medium py-3 rounded-xl transition">
             Continue Shopping
           </Link>
-
-          <p className="text-gray-400 text-xs mt-6">
-            A purchase record has been saved to your account.
-          </p>
         </div>
       </div>
     );
@@ -161,16 +158,13 @@ const PaymentSuccess = () => {
               </svg>
             </div>
           </div>
-
           <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Payment Failed</h1>
           <p className="text-gray-500 text-sm mb-8">
-            Your payment was not completed. You have not been charged.
-            Please try again or contact support if the issue persists.
+            Your payment was not completed. You have not been charged. Please try again.
           </p>
-
           <Link to="/cart"
             className="block w-full bg-red-500 hover:bg-red-600 active:scale-95 transition-all text-white font-bold py-3 rounded-xl mb-3">
-            ← Return to Cart
+            Return to Cart
           </Link>
           <Link to="/"
             className="block w-full border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-medium py-3 rounded-xl transition">
@@ -194,7 +188,6 @@ const PaymentSuccess = () => {
             </svg>
           </div>
         </div>
-
         <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Payment Pending</h1>
         <p className="text-gray-500 text-sm mb-2">
           We couldn't confirm your payment in time. If you completed the M-Pesa prompt,
@@ -203,14 +196,13 @@ const PaymentSuccess = () => {
         <p className="text-gray-400 text-xs mb-8">
           Check <strong>My Downloads</strong> in a few minutes — it will appear once confirmed.
         </p>
-
         <Link to="/downloads"
           className="block w-full bg-yellow-500 hover:bg-yellow-600 active:scale-95 transition-all text-white font-bold py-3 rounded-xl mb-3">
           Check My Downloads
         </Link>
         <Link to="/cart"
           className="block w-full border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-medium py-3 rounded-xl transition">
-          ← Return to Cart
+          Return to Cart
         </Link>
       </div>
     </div>
