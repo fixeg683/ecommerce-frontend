@@ -1,4 +1,4 @@
-\import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
 export const AuthContext = createContext();
@@ -27,9 +27,8 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (username, password) => {
         try {
-            // /api/token/ expects { username, password }
             const res = await axios.post(`${BACKEND_URL}/api/token/`, {
-                username,   // must be the actual username, NOT email
+                username,
                 password,
             });
             const { access, refresh } = res.data;
@@ -58,9 +57,8 @@ export const AuthProvider = ({ children }) => {
 
     const signup = async (username, email, password) => {
         try {
-            // Register with username (not email) as the unique identifier
             await axios.post(`${BACKEND_URL}/api/register/`, {
-                username,   // the chosen username
+                username,
                 email,
                 password,
             });
@@ -93,7 +91,7 @@ export const AuthProvider = ({ children }) => {
             user, token, login, signup, logout,
             authLoading,
             isAuthenticated,
-            loading: authLoading, // alias for legacy usage
+            loading: authLoading,
         }}>
             {children}
         </AuthContext.Provider>
