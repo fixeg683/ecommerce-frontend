@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
 
     const BACKEND_URL =
         import.meta.env.VITE_API_URL ||
-        'https://backend-ecommerce-3-href.onrender.com';
+        'https://backend-ecommerce-1-avn4.onrender.com';
 
     useEffect(() => {
         const savedToken = localStorage.getItem('access_token');

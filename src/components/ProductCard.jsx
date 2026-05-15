@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
 const BACKEND_URL =
-  import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-href.onrender.com';
+  import.meta.env.VITE_API_URL || 'https://backend-ecommerce-1-avn4.onrender.com';
 
 const getFullImageUrl = (product) => {
   if (product.image_url) return product.image_url;
@@ -133,9 +133,8 @@ const ProductCard = ({ product }) => {
 
             <button
               onClick={handleAddToCart}
-              className={`flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-300 ${
-                added ? 'bg-emerald-500 scale-95' : 'bg-green-600 hover:bg-green-700'
-              }`}
+              className={`flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-300 ${added ? 'bg-emerald-500 scale-95' : 'bg-green-600 hover:bg-green-700'
+                }`}
             >
               {added
                 ? <><CheckCircle size={15} /> Added</>
