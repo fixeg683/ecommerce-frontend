@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const BASE = (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-1-avn4.onrender.com').replace(/\/+$/, '');
+
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL || 'https://backend-ecommerce-1-avn4.onrender.com'}/api`,
+  baseURL: `${BASE}/api`,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -34,7 +36,7 @@ api.interceptors.response.use(
       if (refreshToken) {
         try {
           const res = await axios.post(
-            `${import.meta.env.VITE_API_URL || 'https://backend-ecommerce-1-avn4.onrender.com'}/api/token/refresh/`,
+            `${BASE}/api/token/refresh/`,
             { refresh: refreshToken }
           );
           if (res.status === 200) {

@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 
 const BACKEND_URL =
-  import.meta.env.VITE_API_URL || 'https://backend-ecommerce-1-avn4.onrender.com';
+  (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-1-avn4.onrender.com').replace(/\/+$/, '');
 
 const getImageUrl = (item) => {
   if (item.image_url) return item.image_url;
