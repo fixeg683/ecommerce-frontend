@@ -1,63 +1,60 @@
-import axios from 'axios';
+import axios from "axios";
 
-const BASE = (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-1-avn4.onrender.com').replace(/\/+$/, '');
+const API = axios.create({
 
-const api = axios.create({
-  baseURL: `${BASE}/api`,
-  headers: { 'Content-Type': 'application/json' },
+  baseURL:
+    "https://backend-ecommerce-1-avn4.onrender.com/api/",
+
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-api.interceptors.request.use(
+
+// -----------------------------------
+// REQUEST INTERCEPTOR
+// -----------------------------------
+
+API.interceptors.request.use(
+
   (config) => {
-    const token = localStorage.getItem('access_token');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+
+    const token =
+      localStorage.getItem("token");
+
+    if (token) {
+
+      config.headers.Authorization =
+        `Bearer ${token}`;
+    }
+
     return config;
   },
-  (error) => Promise.reject(error)
-);
 
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+  (error) => {
 
-    // Log exact error to console
-    if (error.response) {
-      console.error('[API Error]', {
-        status: error.response.status,
-        url: error.config?.url,
-        data: error.response.data,
-      });
-    }
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      const refreshToken = localStorage.getItem('refresh_token');
-      if (refreshToken) {
-        try {
-          const res = await axios.post(
-            `${BASE}/api/token/refresh/`,
-            { refresh: refreshToken }
-          );
-          if (res.status === 200) {
-            const newAccessToken = res.data.access;
-            localStorage.setItem('access_token', newAccessToken);
-            originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-            return api(originalRequest);
-          }
-        } catch (refreshError) {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
-          return Promise.reject(refreshError);
-        }
-      } else {
-        window.location.href = '/login';
-      }
-    }
     return Promise.reject(error);
   }
 );
 
-export default api;
+
+// -----------------------------------
+// RESPONSE INTERCEPTOR
+// -----------------------------------
+
+API.interceptors.response.use(
+
+  (response) => response,
+
+  (error) => {
+
+    console.error(
+      "API ERROR:",
+      error.response || error.message
+    );
+
+    return Promise.reject(error);
+  }
+);
+
+export default API;
