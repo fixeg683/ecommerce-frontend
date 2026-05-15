@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { showSuccess, showError, showInfo } from '../utils/toast';
 
 export default function Cart() {
   const { cart, removeFromCart, clearCart, markProductsAsPaid } = useCart();
+  const navigate = useNavigate();
   const [phone, setPhone] = useState('');
   const [paying, setPaying] = useState(false);
   const [polling, setPolling] = useState(false);
@@ -32,8 +34,8 @@ export default function Cart() {
           setPolling(false);
           markProductsAsPaid(productIds);
           clearCart();
-          // Hard navigate so Downloads page re-mounts and re-fetches fresh from DB
-          window.location.href = '/downloads?unlocked=1';
+          // Soft navigate to Downloads page
+          navigate('/downloads?unlocked=1');
           return;
         }
 

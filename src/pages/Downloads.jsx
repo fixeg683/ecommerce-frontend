@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import Confetti from 'react-confetti';
 import api from '../api/axios';
 import { showSuccess, showError } from '../utils/toast';
 
@@ -8,6 +9,7 @@ const Downloads = () => {
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(null);
   const [justUnlocked, setJustUnlocked] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const fetchDownloads = async () => {
@@ -27,9 +29,13 @@ const Downloads = () => {
     // Detect redirect from successful payment
     if (searchParams.get('unlocked') === '1') {
       setJustUnlocked(true);
+      setShowConfetti(true);
       showSuccess('✅ Payment confirmed! Your downloads are now unlocked.');
       // Clean the URL without re-mounting
       setSearchParams({}, { replace: true });
+      
+      // Stop confetti after 5 seconds
+      setTimeout(() => setShowConfetti(false), 5000);
     }
     fetchDownloads();
   }, []);
@@ -97,7 +103,13 @@ const Downloads = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4">
+    <div className="max-w-6xl mx-auto px-4 relative">
+      {showConfetti && (
+        <div className="fixed inset-0 z-50 pointer-events-none">
+          <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={500} />
+        </div>
+      )}
+
       <h1 className="text-2xl font-bold mb-6">My Downloads</h1>
 
       {justUnlocked && (
