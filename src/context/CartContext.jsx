@@ -16,13 +16,14 @@ export const CartProvider = ({ children }) => {
 
     api.get('/orders/my-orders/')
       .then(res => {
+        // Each order has an `items` array; each item has a nested `product`
         const ids = res.data
           .filter(o => o.is_paid)
-          .map(o => o.product?.id)
+          .flatMap(o => (o.items || []).map(item => item.product?.id))
           .filter(Boolean);
         setPaidProductIds(ids);
       })
-      .catch(() => {}); // silently ignore — user may not have orders yet
+      .catch(() => { }); // silently ignore — user may not have orders yet
   }, []);
 
   const addToCart = (product) => {
@@ -76,11 +77,11 @@ export const CartProvider = ({ children }) => {
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) return {
-    cart: [], cartOpen: false, setCartOpen: () => {},
-    addToCart: () => {}, removeFromCart: () => {},
-    updateQuantity: () => {}, clearCart: () => {},
+    cart: [], cartOpen: false, setCartOpen: () => { },
+    addToCart: () => { }, removeFromCart: () => { },
+    updateQuantity: () => { }, clearCart: () => { },
     totalItems: 0, totalPrice: 0,
-    paidProductIds: [], markProductsAsPaid: () => {}, hasPaid: () => false,
+    paidProductIds: [], markProductsAsPaid: () => { }, hasPaid: () => false,
   };
   return context;
 };
