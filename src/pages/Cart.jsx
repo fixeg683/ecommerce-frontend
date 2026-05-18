@@ -25,7 +25,6 @@ export default function Cart() {
           checkout_request_id: reqID,
         });
 
-        const resultCode = String(res.data?.ResultCode ?? '');
         const confirmed = res.data?.confirmed === true;
         console.log('[POLL] Verify result:', res.data);
 
@@ -34,16 +33,17 @@ export default function Cart() {
           setPolling(false);
           markProductsAsPaid(productIds);
           clearCart();
-          // Soft navigate to Downloads page
           navigate('/downloads?unlocked=1');
           return;
         }
 
-        // Non-empty ResultCode that isn't 0 means a definite failure (e.g. cancelled, wrong PIN)
-        if (resultCode !== '' && resultCode !== '0') {
+        // Non-pending explicit failure (cancelled, wrong PIN)
+        if (res.data?.success === false && res.data?.confirmed === false &&
+          res.data?.message && !res.data.message.toLowerCase().includes('pending') &&
+          !res.data.message.toLowerCase().includes('processing')) {
           clearInterval(interval);
           setPolling(false);
-          showError(`❌ Payment failed: ${res.data?.ResultDesc || 'Please try again.'}`);
+          showError(`❌ ${res.data.message}`);
           return;
         }
 
@@ -71,7 +71,6 @@ export default function Cart() {
 
     try {
       const productIds = cart.map(i => i.id);
-      const paidItems = [...cart];
 
       const res = await api.post('/pay/', {
         phone: cleaned,
@@ -89,20 +88,18 @@ export default function Cart() {
       }
 
       showSuccess('📱 STK push sent! Enter your M-Pesa PIN on your phone…');
-
-      pollPaymentStatus(reqID, paidItems, productIds);
+      pollPaymentStatus(reqID, [...cart], productIds);
 
     } catch (err) {
       console.error('[PAY] Error:', err.response?.data);
 
+      // Backend returns { success, error } — guard against object values
+      const raw = err.response?.data;
       const detail =
-        err.response?.data?.error ||
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        (typeof err.response?.data === 'object'
-          ? JSON.stringify(err.response.data)
-          : null) ||
-        'Payment failed. Please try again.';
+        (typeof raw?.error === 'string' ? raw.error : null) ||
+        (typeof raw?.detail === 'string' ? raw.detail : null) ||
+        (typeof raw?.message === 'string' ? raw.message : null) ||
+        'Payment failed. Please check your number and try again.';
 
       showError(`❌ ${detail}`);
     } finally {
