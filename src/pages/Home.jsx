@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { PackageSearch, Loader2, AlertTriangle, Monitor, Gamepad2, Film } from 'lucide-react';
+import { PackageSearch, Loader2, AlertTriangle, Monitor, Gamepad2, Film, BookOpen } from 'lucide-react';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 
@@ -8,7 +8,10 @@ const CATEGORY_ICONS = {
   Softwares: Monitor,
   Games: Gamepad2,
   Movies: Film,
+  'E-Books': BookOpen,
 };
+
+const CATEGORIES = ['All', 'Softwares', 'Games', 'Movies', 'E-Books'];
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -34,8 +37,8 @@ const Home = () => {
   const filtered = activeCategory === 'All'
     ? products
     : products.filter(p =>
-        p.category_name?.toLowerCase() === activeCategory.toLowerCase()
-      );
+      p.category_name?.toLowerCase() === activeCategory.toLowerCase()
+    );
 
   const CategoryIcon = CATEGORY_ICONS[activeCategory];
 
@@ -74,7 +77,9 @@ const Home = () => {
               {activeCategory === 'All' ? 'Explore Products' : activeCategory}
             </h1>
             <p className="text-gray-400 text-sm mt-0.5">
-              {activeCategory === 'All' ? 'Discover the best deals on Nexusmall' : `Browsing ${activeCategory.toLowerCase()}`}
+              {activeCategory === 'All'
+                ? 'Discover the best deals on Nexusmall'
+                : `Browsing ${activeCategory.toLowerCase()}`}
             </p>
           </div>
         </div>
@@ -85,18 +90,17 @@ const Home = () => {
 
       {/* Category pills */}
       <div className="flex flex-wrap gap-2 mb-8">
-        {['All', 'Softwares', 'Games', 'Movies'].map((cat) => {
+        {CATEGORIES.map((cat) => {
           const Icon = CATEGORY_ICONS[cat];
           const isActive = activeCategory === cat;
           return (
             <button
               key={cat}
               onClick={() => cat === 'All' ? setSearchParams({}) : setSearchParams({ category: cat })}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition ${
-                isActive
-                  ? 'bg-green-600 text-white border-green-600 shadow-sm'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-600'
-              }`}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition ${isActive
+                ? 'bg-green-600 text-white border-green-600 shadow-sm'
+                : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-600'
+                }`}
             >
               {Icon && <Icon size={14} />}
               {cat}
@@ -105,7 +109,7 @@ const Home = () => {
         })}
       </div>
 
-      {/* Grid — full width, responsive columns */}
+      {/* Grid */}
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4 border-2 border-dashed border-gray-200 rounded-2xl bg-white">
           <PackageSearch size={72} className="text-gray-200" />

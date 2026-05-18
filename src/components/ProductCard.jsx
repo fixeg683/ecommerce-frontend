@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Download, ImageOff, CheckCircle, Lock } from 'lucide-react';
+import { ShoppingCart, Download, ImageOff, CheckCircle, Lock, BookOpen, User, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -15,6 +15,14 @@ const getFullImageUrl = (product) => {
   return `${BACKEND_URL}${product.image}`;
 };
 
+// Colour coding per product type
+const TYPE_STYLES = {
+  ebook: { bg: 'bg-amber-500', label: 'E-Book', Icon: BookOpen },
+  software: { bg: 'bg-blue-600', label: 'Software', Icon: null },
+  game: { bg: 'bg-purple-600', label: 'Game', Icon: null },
+  movie: { bg: 'bg-red-600', label: 'Movie', Icon: null },
+};
+
 const ProductCard = ({ product }) => {
   const { addToCart, hasPaid } = useCart();
   const { isAuthenticated } = useAuth();
@@ -26,18 +34,18 @@ const ProductCard = ({ product }) => {
   const imageUrl = getFullImageUrl(product);
   const showImage = imageUrl && !imgError;
   const isPaid = hasPaid(product.id);
-  const hasFile = !!product.file;
+  const isEbook = product.is_ebook || product.product_type === 'ebook';
+  const hasFile = !!(product.file || product.ebook_file || product.download_url);
+
+  const typeInfo = TYPE_STYLES[product.product_type] || TYPE_STYLES.software;
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-
     if (!isAuthenticated) {
-      // Redirect to signup with context message
       navigate('/signup', { state: { from: '/cart' } });
       return;
     }
-
     addToCart(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
@@ -46,12 +54,10 @@ const ProductCard = ({ product }) => {
   const handleDownload = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-
     if (!isAuthenticated) {
       navigate('/login', { state: { from: '/cart' } });
       return;
     }
-
     try {
       const res = await api.get(`/download/${product.id}/`);
       window.open(res.data.download_url, '_blank');
@@ -63,10 +69,17 @@ const ProductCard = ({ product }) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 flex flex-col group overflow-hidden">
 
-      {/* Image */}
+      {/* Image / cover */}
       <Link to={`/product/${product.id}`} className="block">
         <div className="relative w-full h-56 overflow-hidden bg-gray-100">
-          {showImage ? (
+
+          {/* E-Book placeholder when no cover */}
+          {isEbook && !showImage ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-amber-100 gap-2">
+              <BookOpen size={48} className="text-amber-400" />
+              <span className="text-xs text-amber-500 font-semibold">E-Book</span>
+            </div>
+          ) : showImage ? (
             <img
               src={imageUrl} alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -79,7 +92,14 @@ const ProductCard = ({ product }) => {
             </div>
           )}
 
-          {/* Lock / Download badge */}
+          {/* Product type badge (top-left) */}
+          {product.product_type && product.product_type !== 'software' && (
+            <div className={`absolute top-3 left-3 ${typeInfo.bg} text-white text-[10px] font-bold px-2 py-0.5 rounded-full`}>
+              {typeInfo.label}
+            </div>
+          )}
+
+          {/* Lock / Download badge (top-right) */}
           {hasFile && (
             <div className="absolute top-3 right-3">
               {isPaid ? (
@@ -108,6 +128,22 @@ const ProductCard = ({ product }) => {
           </h2>
         </Link>
 
+        {/* E-Book metadata */}
+        {isEbook && (product.author || product.page_count) && (
+          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-2">
+            {product.author && (
+              <span className="flex items-center gap-1 text-xs text-amber-600 font-medium">
+                <User size={11} /> {product.author}
+              </span>
+            )}
+            {product.page_count && (
+              <span className="flex items-center gap-1 text-xs text-gray-400">
+                <FileText size={11} /> {product.page_count} pages
+              </span>
+            )}
+          </div>
+        )}
+
         <p className="text-gray-400 text-sm line-clamp-2 flex-grow mb-4">
           {product.description || 'No description available.'}
         </p>
@@ -127,7 +163,7 @@ const ProductCard = ({ product }) => {
                 className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-3 py-2 rounded-lg transition"
               >
                 <Download size={14} />
-                Download
+                {isEbook ? 'Read' : 'Download'}
               </button>
             )}
 
