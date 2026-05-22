@@ -1,12 +1,12 @@
 import axios from "axios";
 
-const instance = axios.create({
+const API = axios.create({
   baseURL:
     import.meta.env.VITE_API_URL ||
-    "https://your-backend-url.onrender.com/api",
+    "http://127.0.0.1:8000/api",
 });
 
-instance.interceptors.request.use((config) => {
+API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
   if (token) {
@@ -16,4 +16,4 @@ instance.interceptors.request.use((config) => {
   return config;
 });
 
-export default instance;
+export default API;

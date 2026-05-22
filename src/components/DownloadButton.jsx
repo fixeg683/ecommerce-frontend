@@ -1,15 +1,21 @@
 import React from "react";
-import { Download, Lock } from "lucide-react";
 import toast from "react-hot-toast";
 
 const DownloadButton = ({ product, paid }) => {
   const handleDownload = () => {
     if (!paid) {
-      toast.error("Complete payment to unlock downloads");
+      toast.error(
+        "Complete payment to unlock downloads"
+      );
       return;
     }
 
-    toast.success("Download unlocked");
+    if (!product?.digital_file) {
+      toast.error("Download file not available");
+      return;
+    }
+
+    toast.success("Download started");
 
     window.open(product.digital_file, "_blank");
   };
@@ -17,14 +23,13 @@ const DownloadButton = ({ product, paid }) => {
   return (
     <button
       onClick={handleDownload}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+      className={`px-4 py-2 rounded text-white ${
         paid
-          ? "bg-green-600 hover:bg-green-700 text-white"
-          : "bg-gray-600 text-white"
+          ? "bg-green-600"
+          : "bg-gray-500"
       }`}
     >
-      {paid ? <Download size={18} /> : <Lock size={18} />}
-      {paid ? "Download Now" : "Locked"}
+      {paid ? "Download" : "Locked"}
     </button>
   );
 };

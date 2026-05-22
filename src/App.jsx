@@ -1,5 +1,10 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from 'react-router-dom';
 
 // Contexts
 import { CartProvider } from './context/CartContext';
@@ -19,34 +24,31 @@ import Downloads from './pages/Downloads';
 import PaymentSuccess from './pages/PaymentSuccess';
 
 // Toast
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { Toaster } from 'react-hot-toast';
 
 const AUTH_ROUTES = ['/login', '/signup'];
 
 function AppLayout() {
   const location = useLocation();
-  const isAuthPage = AUTH_ROUTES.includes(location.pathname);
+
+  const isAuthPage = AUTH_ROUTES.includes(
+    location.pathname
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 w-full">
 
-      {/* Toast Notifications — z-index 9999 ensures it renders above everything */}
-      <ToastContainer
+      {/* Toast Notifications */}
+      <Toaster
         position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnHover
-        draggable
-        limit={5}
-        style={{ zIndex: 9999 }}
+        reverseOrder={false}
       />
 
+      {/* Navbar + Cart */}
       {!isAuthPage && <Navbar />}
       {!isAuthPage && <CartDrawer />}
 
+      {/* Main Content */}
       <main
         className={
           isAuthPage
@@ -55,18 +57,24 @@ function AppLayout() {
         }
       >
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
+
+          {/* Public Routes */}
+          <Route
+            path="/"
+            element={<Home />}
+          />
 
           <Route
-            path="/payment-success"
-            element={
-              <ProtectedRoute>
-                <PaymentSuccess />
-              </ProtectedRoute>
-            }
+            path="/login"
+            element={<Login />}
           />
+
+          <Route
+            path="/signup"
+            element={<Signup />}
+          />
+
+          {/* Protected Routes */}
           <Route
             path="/cart"
             element={
@@ -75,6 +83,7 @@ function AppLayout() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/downloads"
             element={
@@ -84,13 +93,28 @@ function AppLayout() {
             }
           />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route
+            path="/payment-success"
+            element={
+              <ProtectedRoute>
+                <PaymentSuccess />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Redirect Unknown Routes */}
+          <Route
+            path="*"
+            element={<Navigate to="/" replace />}
+          />
+
         </Routes>
       </main>
 
+      {/* Footer */}
       {!isAuthPage && (
         <footer className="py-4 text-center text-gray-400 text-xs border-t bg-white">
-          &copy; 2026 Nexusmall Marketplace
+          © 2026 Nexusmall Marketplace
         </footer>
       )}
     </div>
@@ -99,13 +123,11 @@ function AppLayout() {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <CartProvider>
-          <AppLayout />
-        </CartProvider>
-      </AuthProvider>
-    </Router>
+    <AuthProvider>
+      <CartProvider>
+        <AppLayout />
+      </CartProvider>
+    </AuthProvider>
   );
 }
 
