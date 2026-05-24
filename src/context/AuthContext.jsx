@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+﻿import { createContext, useContext, useEffect, useState } from "react";
 import {
   loginUser,
   registerUser,
@@ -8,98 +8,101 @@ import {
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(null);
-    const [authLoading, setAuthLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    const BACKEND_URL = (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-2hqt.onrender.com/api').replace(/\/+$/, '');
+  // =========================
+  // LOAD USER
+  // =========================
 
-    useEffect(() => {
-        const savedToken = localStorage.getItem('access_token');
-        const savedUser = localStorage.getItem('user');
-        if (savedToken && savedUser) {
-            try {
-                setToken(savedToken);
-                setUser(JSON.parse(savedUser));
-            } catch {
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('user');
-            }
-        }
-        setAuthLoading(false);
-    }, []);
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
 
-    const login = async (username, password) => {
-        try {
-            const res = await axios.post(`${BACKEND_URL}/token/`, {
-                username,
-                password,
-            });
-            const { access, refresh } = res.data;
-            if (!access) throw new Error('No access token returned');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
 
-            localStorage.setItem('access_token', access);
-            localStorage.setItem('refresh_token', refresh);
+    setLoading(false);
+  }, []);
 
-            const userData = { username };
-            localStorage.setItem('user', JSON.stringify(userData));
-            setToken(access);
-            setUser(userData);
+  // =========================
+  // LOGIN
+  // =========================
 
-            return { success: true, user: userData };
-        } catch (error) {
-            if (error.response) {
-                throw new Error(
-                    error.response.data?.detail ||
-                    error.response.data?.message ||
-                    'Invalid credentials'
-                );
-            }
-            throw new Error('Network error. Please try again.');
-        }
-    };
+  const login = async (email, password) => {
+    try {
+      const data = await loginUser({
+        email,
+        password,
+      });
 
-    const signup = async (username, email, password) => {
-        try {
-            await axios.post(`${BACKEND_URL}/register/`, {
-                username,
-                email,
-                password,
-            });
-            return { success: true };
-        } catch (error) {
-            if (error.response) {
-                const data = error.response.data;
-                throw new Error(
-                    data?.detail ||
-                    data?.message ||
-                    Object.values(data).flat().join(' ')
-                );
-            }
-            throw new Error('Network error. Please try again.');
-        }
-    };
+      if (data.user) {
+        setUser(data.user);
+      }
 
-    const logout = () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user');
-        setToken(null);
-        setUser(null);
-    };
+      return {
+        success: true,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error?.response?.data?.detail ||
+          error?.response?.data?.message ||
+          "Login failed",
+      };
+    }
+  };
 
-    const isAuthenticated = !!token || !!localStorage.getItem('access_token');
+  // =========================
+  // REGISTER
+  // =========================
 
-    return (
-        <AuthContext.Provider value={{
-            user, token, login, signup, logout,
-            authLoading,
-            isAuthenticated,
-            loading: authLoading,
-        }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  const register = async (formData) => {
+    try {
+      await registerUser(formData);
+
+      // AUTO LOGIN AFTER REGISTER
+      const loginResult = await login(
+        formData.email,
+        formData.password
+      );
+
+      return loginResult;
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error?.response?.data?.detail ||
+          error?.response?.data?.message ||
+          "Registration failed",
+      };
+    }
+  };
+
+  // =========================
+  // LOGOUT
+  // =========================
+
+  const logout = () => {
+    logoutUser();
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        logout,
+        isAuthenticated: !!user,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => useContext(AuthContext);
