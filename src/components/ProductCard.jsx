@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
 const BACKEND_URL =
-  (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-1-avn4.onrender.com').replace(/\/+$/, '');
+  (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-2hqt.onrender.com/api').replace(/\/+$/, '');
 
 const getFullImageUrl = (product) => {
   if (product.image_url) return product.image_url;

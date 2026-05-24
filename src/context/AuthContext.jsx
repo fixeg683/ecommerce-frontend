@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(null);
     const [authLoading, setAuthLoading] = useState(true);
 
-    const BACKEND_URL = (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-1-avn4.onrender.com').replace(/\/+$/, '');
+    const BACKEND_URL = (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-2hqt.onrender.com/api').replace(/\/+$/, '');
 
     useEffect(() => {
         const savedToken = localStorage.getItem('access_token');
