@@ -1,7 +1,7 @@
 ﻿import API from "../api/axios";
 
 // =========================
-// REGISTER
+// REGISTER USER
 // =========================
 
 export const registerUser = async (userData) => {
@@ -10,15 +10,19 @@ export const registerUser = async (userData) => {
 };
 
 // =========================
-// LOGIN
+// LOGIN USER
 // =========================
 
 export const loginUser = async (credentials) => {
   const response = await API.post("login/", credentials);
 
-  // Save token + user
+  // Save auth data
   if (response.data.token) {
     localStorage.setItem("token", response.data.token);
+  }
+
+  if (response.data.refresh) {
+    localStorage.setItem("refresh", response.data.refresh);
   }
 
   if (response.data.user) {
@@ -32,10 +36,11 @@ export const loginUser = async (credentials) => {
 };
 
 // =========================
-// LOGOUT
+// LOGOUT USER
 // =========================
 
 export const logoutUser = () => {
   localStorage.removeItem("token");
+  localStorage.removeItem("refresh");
   localStorage.removeItem("user");
 };
