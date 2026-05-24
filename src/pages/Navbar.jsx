@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useContext, useState, useRef, useEffect } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { ShoppingCart, LogOut, User, ChevronDown, Monitor, Gamepad2, Film } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
@@ -11,7 +11,7 @@ const CATEGORIES = [
 ];
 
 const Navbar = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout } = useAuth();
   const { totalItems, setCartOpen } = useCart();
   const navigate = useNavigate();
 
