@@ -9,12 +9,12 @@ export const CartProvider = ({ children }) => {
   const [paidProductIds, setPaidProductIds] = useState([]);
 
   // On mount, restore which products the user has already paid for
-  // Uses /orders/my-orders/ which exists and returns { order_id, is_paid, product: { id, ... } }
+  // Uses orders/my-orders/ which exists and returns { order_id, is_paid, product: { id, ... } }
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
-    api.get('/orders/my-orders/')
+    api.get('orders/my-orders/')
       .then(res => {
         // Each order has an `items` array; each item has a nested `product`
         const ids = res.data

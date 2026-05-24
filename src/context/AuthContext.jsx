@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (username, password) => {
         try {
-            const res = await axios.post(`${BACKEND_URL}/api/token/`, {
+            const res = await axios.post(`${BACKEND_URL}/token/`, {
                 username,
                 password,
             });
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }) => {
 
     const signup = async (username, email, password) => {
         try {
-            await axios.post(`${BACKEND_URL}/api/register/`, {
+            await axios.post(`${BACKEND_URL}/register/`, {
                 username,
                 email,
                 password,

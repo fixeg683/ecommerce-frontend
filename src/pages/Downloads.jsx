@@ -13,7 +13,7 @@ const Downloads = () => {
 
   const fetchDownloads = async () => {
     try {
-      const response = await API.get("/downloads/");
+      const response = await API.get("downloads/");
 
       setProducts(response.data.products || []);
       setPaid(response.data.paid || false);

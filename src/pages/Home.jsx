@@ -23,7 +23,7 @@ const Home = () => {
   const fetchProducts = () => {
     setLoading(true);
     setError(null);
-    api.get('/products/')
+    api.get('products/')
       .then(res => setProducts(res.data))
       .catch((err) => {
         console.error('API Error:', err);

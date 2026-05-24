@@ -24,7 +24,7 @@ const PaymentSuccess = () => {
         return;
       }
 
-      const response = await API.post("/payment/verify/", {
+      const response = await API.post("payment/verify/", {
         order_id: orderId,
       });
 

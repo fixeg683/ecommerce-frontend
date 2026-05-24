@@ -4,7 +4,7 @@ import api from '../lib/api'; // auth-configured axios instance
  * Initiate M-Pesa STK Push
  */
 export const initiatePay = (phone, amount, productIds) => {
-  return api.post('/api/pay/', {
+  return api.post('pay/', {
     phone,
     amount,
     product_ids: productIds,
@@ -15,7 +15,7 @@ export const initiatePay = (phone, amount, productIds) => {
  * Poll M-Pesa for payment confirmation
  */
 export const verifyPayment = (checkoutRequestId) => {
-  return api.post('/api/verify-payment/', {
+  return api.post('verify-payment/', {
     checkout_request_id: checkoutRequestId,
   });
 };
