@@ -1,7 +1,11 @@
-import { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import { createContext, useContext, useEffect, useState } from "react";
+import {
+  loginUser,
+  registerUser,
+  logoutUser,
+} from "../services/authService";
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);

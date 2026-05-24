@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 function Signup() {
-  const { signup, login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const returnTo = location.state?.from || '/';
@@ -28,13 +28,17 @@ function Signup() {
     setError('');
 
     try {
-      // 1. Register the account
-      await signup(formData.username, formData.email, formData.password);
+      const result = await register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      });
 
-      // 2. Immediately log in with the same username + password
-      await login(formData.username, formData.password);
-
-      navigate(returnTo, { replace: true });
+      if (result.success) {
+        navigate(returnTo, { replace: true });
+      } else {
+        setError(result.message);
+      }
     } catch (err) {
       setError(err.message || 'Signup failed. Please try again.');
     } finally {
