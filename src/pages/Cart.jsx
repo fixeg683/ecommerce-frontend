@@ -21,7 +21,7 @@ export default function Cart() {
     const interval = setInterval(async () => {
       attempts++;
       try {
-        const res = await api.post('verify-payment/', {
+        const res = await api.post('payment/verify/', {
           checkout_request_id: reqID,
         });
 
@@ -72,7 +72,7 @@ export default function Cart() {
     try {
       const productIds = cart.map(i => i.id);
 
-      const res = await api.post('pay/', {
+      const res = await api.post('create-order/', {
         phone: cleaned,
         amount: totalPrice,
         product_ids: productIds,

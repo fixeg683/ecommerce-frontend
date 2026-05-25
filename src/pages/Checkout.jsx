@@ -12,13 +12,13 @@ const Checkout = () => {
 
       setLoading(true);
 
-      // Example payment request
-      const { data } = await axios.post("/payment/initiate/", {
+      // Create order and initiate payment
+      const { data } = await axios.post("create-order/", {
         amount: 1,
       });
 
-      // Simulate payment success
-      const verify = await axios.post("/payment/verify/", {
+      // Verify payment status
+      const verify = await axios.post("payment/verify/", {
         checkout_id: data.checkout_id,
       });
 
