@@ -28,14 +28,16 @@ export const loginUser = async (credentials) => {
     localStorage.setItem("refresh", response.data.refresh);
   }
 
-  if (response.data.user) {
-    localStorage.setItem(
-      "user",
-      JSON.stringify(response.data.user)
-    );
-  }
+  const user = response.data.user || {
+    username: credentials.username || credentials.email,
+  };
 
-  return response.data;
+  localStorage.setItem("user", JSON.stringify(user));
+
+  return {
+    ...response.data,
+    user,
+  };
 };
 
 // =========================

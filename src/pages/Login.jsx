@@ -10,7 +10,7 @@ function Login() {
   const returnTo = location.state?.from || '/';
 
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: ''
   });
 
@@ -27,7 +27,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const result = await login(formData.email, formData.password);
+    const result = await login(formData.username, formData.password);
 
     if (result.success) {
       navigate(returnTo, { replace: true });
@@ -53,12 +53,12 @@ function Login() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-          {/* EMAIL */}
+          {/* USERNAME */}
           <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={formData.username}
             onChange={handleChange}
             required
             className="w-full px-4 py-3 border rounded-lg"

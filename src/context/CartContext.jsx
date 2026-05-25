@@ -11,7 +11,7 @@ export const CartProvider = ({ children }) => {
   // On mount, restore which products the user has already paid for
   // Uses orders/my-orders/ which exists and returns { order_id, is_paid, product: { id, ... } }
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('access');
     if (!token) return;
 
     api.get('orders/my-orders/')
