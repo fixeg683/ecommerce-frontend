@@ -1,23 +1,31 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import API from "../api/axios";
+import { useCart } from "../context/CartContext";
 
 const Checkout = () => {
-
+  const { totalPrice } = useCart();
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handlePayment = async () => {
-
     try {
-
       setLoading(true);
 
-      // Create order and initiate payment
-      const { data } = await API.post("create-order/", {
-        amount: 1,
-      });
+      const cleanPhone = phone
+        .replace(/^0/, "254")
+        .replace(/\+/g, "");
 
-      // Verify payment status
+      const payload = {
+        phone_number: cleanPhone,
+        amount: Number(totalPrice),
+      };
+
+      console.log("PAYLOAD:", payload);
+
+      const { data } = await API.post("create-order/", payload);
+      console.log(data);
+
       const verify = await API.post("payment/verify/", {
         checkout_id: data.checkout_id,
       });
@@ -64,10 +72,27 @@ const Checkout = () => {
         Checkout
       </h1>
 
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Safaricom Phone Number
+        </label>
+        <input
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="254712345678"
+          className="w-full px-4 py-3 border rounded"
+        />
+      </div>
+
+      <div className="mb-6 text-sm text-gray-600">
+        Use format <strong>254712345678</strong>. Do not include leading 0 or +.
+      </div>
+
       <button
         onClick={handlePayment}
-        disabled={loading}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
+        disabled={loading || !phone.trim()}
+        className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
       >
         {loading ? "Processing..." : "Pay Now"}
       </button>
