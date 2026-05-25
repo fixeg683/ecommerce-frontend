@@ -15,11 +15,10 @@ export const registerUser = async (userData) => {
 
 export const loginUser = async (credentials) => {
   const response = await API.post("token/", {
-    username: credentials.username || credentials.email,
+    username: credentials.username,
     password: credentials.password,
   });
 
-  // Save auth data
   if (response.data.access) {
     localStorage.setItem("access", response.data.access);
   }
@@ -29,7 +28,7 @@ export const loginUser = async (credentials) => {
   }
 
   const user = response.data.user || {
-    username: credentials.username || credentials.email,
+    username: credentials.username,
   };
 
   localStorage.setItem("user", JSON.stringify(user));
