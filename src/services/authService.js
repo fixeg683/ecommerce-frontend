@@ -14,11 +14,14 @@ export const registerUser = async (userData) => {
 // =========================
 
 export const loginUser = async (credentials) => {
-  const response = await API.post("login/", credentials);
+  const response = await API.post("token/", {
+    username: credentials.username || credentials.email,
+    password: credentials.password,
+  });
 
   // Save auth data
-  if (response.data.token) {
-    localStorage.setItem("token", response.data.token);
+  if (response.data.access) {
+    localStorage.setItem("access", response.data.access);
   }
 
   if (response.data.refresh) {
@@ -40,7 +43,7 @@ export const loginUser = async (credentials) => {
 // =========================
 
 export const logoutUser = () => {
-  localStorage.removeItem("token");
+  localStorage.removeItem("access");
   localStorage.removeItem("refresh");
   localStorage.removeItem("user");
 };

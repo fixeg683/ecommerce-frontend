@@ -39,8 +39,13 @@ const Checkout = () => {
       }
 
     } catch (error) {
-
-      console.log(error);
+      console.log("FULL ERROR:", error);
+      if (error.response) {
+        console.log("STATUS:", error.response.status);
+        console.log("DATA:", error.response.data);
+      } else {
+        console.log(error.message);
+      }
 
       toast.error(
         "Payment failed. Try again."

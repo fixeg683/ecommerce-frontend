@@ -91,9 +91,14 @@ export default function Cart() {
       pollPaymentStatus(reqID, [...cart], productIds);
 
     } catch (err) {
-      console.error('[PAY] Error:', err.response?.data);
+      console.log("FULL ERROR:", err);
+      if (err.response) {
+        console.log("STATUS:", err.response.status);
+        console.log("DATA:", err.response.data);
+      } else {
+        console.log(err.message);
+      }
 
-      // Backend returns { success, error } — guard against object values
       const raw = err.response?.data;
       const detail =
         (typeof raw?.error === 'string' ? raw.error : null) ||

@@ -43,7 +43,13 @@ const PaymentSuccess = () => {
         toast.error("Payment verification failed");
       }
     } catch (error) {
-      console.error(error);
+      console.log("FULL ERROR:", error);
+      if (error.response) {
+        console.log("STATUS:", error.response.status);
+        console.log("DATA:", error.response.data);
+      } else {
+        console.log(error.message);
+      }
 
       toast.error("Server error");
     } finally {
