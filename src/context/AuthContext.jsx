@@ -29,10 +29,10 @@ export const AuthProvider = ({ children }) => {
   // LOGIN
   // =========================
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
     try {
       const data = await loginUser({
-        username,
+        email,
         password,
       });
 
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
 
       // AUTO LOGIN AFTER REGISTER
       const loginResult = await login(
-        formData.username,
+        formData.email,
         formData.password
       );
 

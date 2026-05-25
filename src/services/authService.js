@@ -14,8 +14,8 @@ export const registerUser = async (userData) => {
 // =========================
 
 export const loginUser = async (credentials) => {
-  const response = await API.post("token/", {
-    username: credentials.username,
+  const response = await API.post("login/", {
+    email: credentials.email,
     password: credentials.password,
   });
 
@@ -28,7 +28,7 @@ export const loginUser = async (credentials) => {
   }
 
   const user = response.data.user || {
-    username: credentials.username,
+    email: credentials.email,
   };
 
   localStorage.setItem("user", JSON.stringify(user));
