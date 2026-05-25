@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import axios from "../api/axios";
+import API from "../api/axios";
 
 const Checkout = () => {
 
@@ -13,12 +13,12 @@ const Checkout = () => {
       setLoading(true);
 
       // Create order and initiate payment
-      const { data } = await axios.post("create-order/", {
+      const { data } = await API.post("create-order/", {
         amount: 1,
       });
 
       // Verify payment status
-      const verify = await axios.post("payment/verify/", {
+      const verify = await API.post("payment/verify/", {
         checkout_id: data.checkout_id,
       });
 
