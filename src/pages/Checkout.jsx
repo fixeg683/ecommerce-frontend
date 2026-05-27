@@ -4,7 +4,7 @@ import API from "../api/axios";
 import { useCart } from "../context/CartContext";
 
 const Checkout = () => {
-  const { totalPrice } = useCart();
+  const { totalPrice, cartItems } = useCart();
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -19,32 +19,50 @@ const Checkout = () => {
       const payload = {
         phone_number: cleanPhone,
         amount: Number(totalPrice),
+        product_ids: cartItems.map(i => i.id),
       };
 
       console.log("PAYLOAD:", payload);
 
       const { data } = await API.post("create-order/", payload);
-      console.log(data);
+      console.log("[PAY] Response:", data);
 
-      const verify = await API.post("payment/verify/", {
-        checkout_id: data.checkout_id,
-      });
+      const checkoutRequestId = data.CheckoutRequestID;
+      let confirmed = false;
 
-      if (verify.data.success) {
+      // Poll every 5 seconds, up to 12 times (1 minute)
+      for (let i = 0; i < 12; i++) {
+        await new Promise(r => setTimeout(r, 5000));
 
-        // SAVE PURCHASE STATE
-        localStorage.setItem(
-          "downloadsUnlocked",
-          "true"
-        );
+        const { data: vData } = await API.post("payment/verify/", {
+          checkout_request_id: checkoutRequestId,
+        });
 
-        toast.success(
-          "Payment successful! Downloads unlocked."
-        );
+        console.log("[POLL] Verify result:", vData);
 
-        // redirect
-        window.location.href = "/downloads";
+        if (vData.success && vData.confirmed) {
+          confirmed = true;
+          break;
+        }
       }
+
+      if (!confirmed) {
+        toast.error("Payment not confirmed within 60s. Contact support if charged.");
+        return;
+      }
+
+      // SAVE PURCHASE STATE
+      localStorage.setItem(
+        "downloadsUnlocked",
+        "true"
+      );
+
+      toast.success(
+        "Payment successful! Downloads unlocked."
+      );
+
+      // redirect
+      window.location.href = "/downloads";
 
     } catch (error) {
       console.log("FULL ERROR:", error);

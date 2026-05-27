@@ -16,10 +16,3 @@ api.interceptors.request.use((config) => {
 });
 
 export default api;
-
-
-    return Promise.reject(error);
-  }
-);
-
-export default api;
