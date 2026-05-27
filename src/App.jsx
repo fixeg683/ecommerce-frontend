@@ -42,6 +42,26 @@ function AppLayout() {
       <Toaster
         position="top-right"
         reverseOrder={false}
+        gutter={12}
+        toastOptions={{
+          duration: 5000,
+          style: {
+            borderRadius: '12px',
+            background: '#111827',
+            color: '#f9fafb',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.18)',
+          },
+          success: {
+            icon: '✅',
+          },
+          error: {
+            icon: '❌',
+            duration: 7000,
+          },
+          loading: {
+            icon: '⏳',
+          },
+        }}
       />
 
       {/* Navbar + Cart */}

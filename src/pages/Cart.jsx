@@ -16,7 +16,18 @@ export default function Cart() {
   const pollPaymentStatus = (reqID, paidItems, productIds) => {
     setPolling(true);
     let attempts = 0;
-    const maxAttempts = 12; // 60 seconds
+    const maxAttempts = 24; // 120 seconds
+
+    const TERMINAL_FAILURES = [
+      'cancelled by user',
+      'wrong pin',
+      'incorrect pin',
+      'insufficient funds',
+      'insufficient',
+      'declined',
+      'failed',
+      'denied',
+    ];
 
     const interval = setInterval(async () => {
       attempts++;
@@ -26,6 +37,7 @@ export default function Cart() {
         });
 
         const confirmed = res.data?.confirmed === true;
+        const message = (res.data?.message || '').toLowerCase();
         console.log('[POLL] Verify result:', res.data);
 
         if (confirmed) {
@@ -33,14 +45,16 @@ export default function Cart() {
           setPolling(false);
           markProductsAsPaid(productIds);
           clearCart();
-          navigate('/downloads?unlocked=1');
+          showSuccess('🎉 Payment successful! Your downloads are now unlocked.');
+          setTimeout(() => navigate('/downloads?unlocked=1'), 1500);
           return;
         }
 
-        // Non-pending explicit failure (cancelled, wrong PIN)
-        if (res.data?.success === false && res.data?.confirmed === false &&
-          res.data?.message && !res.data.message.toLowerCase().includes('pending') &&
-          !res.data.message.toLowerCase().includes('processing')) {
+        const isTerminalFailure = TERMINAL_FAILURES.some((term) =>
+          message.includes(term)
+        );
+
+        if (res.data?.success === false && res.data?.confirmed === false && isTerminalFailure) {
           clearInterval(interval);
           setPolling(false);
           showError(`❌ ${res.data.message}`);

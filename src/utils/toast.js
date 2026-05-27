@@ -1,28 +1,39 @@
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 
 const BASE_OPTIONS = {
+  duration: 5000,
   position: 'top-right',
-  autoClose: 4000,
-  hideProgressBar: false,
-  closeOnClick: true,
-  pauseOnHover: true,
-  draggable: true,
 };
 
 export const showSuccess = (msg) =>
-  toast.success(msg, { ...BASE_OPTIONS });
+  toast.success(msg, {
+    ...BASE_OPTIONS,
+    icon: '✅',
+  });
 
 export const showError = (msg) =>
-  toast.error(msg, { ...BASE_OPTIONS, autoClose: 5000 });
+  toast.error(msg, {
+    ...BASE_OPTIONS,
+    duration: 6000,
+    icon: '❌',
+  });
 
 export const showInfo = (msg) =>
-  toast.info(msg, { ...BASE_OPTIONS });
+  toast(msg, {
+    ...BASE_OPTIONS,
+    icon: 'ℹ️',
+  });
 
 export const showWarning = (msg) =>
-  toast.warning(msg, { ...BASE_OPTIONS });
+  toast(msg, {
+    ...BASE_OPTIONS,
+    icon: '⚠️',
+  });
 
 export const showLoading = (msg) =>
-  toast.loading(msg, { position: 'top-right' });
+  toast.loading(msg, {
+    ...BASE_OPTIONS,
+  });
 
 export const dismissToast = (id) =>
   toast.dismiss(id);
