@@ -4,20 +4,22 @@ import toast from "react-hot-toast";
 const DownloadButton = ({ product, paid }) => {
   const handleDownload = () => {
     if (!paid) {
-      toast.error(
-        "Complete payment to unlock downloads"
-      );
+      toast.error("Complete payment to unlock downloads");
       return;
     }
 
-    if (!product?.digital_file) {
+    const downloadUrl =
+      product?.downloadable_file ||
+      product?.download_url ||
+      product?.file;
+
+    if (!downloadUrl) {
       toast.error("Download file not available");
       return;
     }
 
     toast.success("Download started");
-
-    window.open(product.digital_file, "_blank");
+    window.open(downloadUrl, "_blank");
   };
 
   return (
