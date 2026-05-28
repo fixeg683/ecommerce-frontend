@@ -87,15 +87,19 @@ function Signup() {
           />
 
           {/* PASSWORD */}
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-          />
+          <div>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              minLength={8}
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+            />
+            <p className="text-xs text-gray-400 mt-1 ml-1">Minimum 8 characters</p>
+          </div>
 
           <button
             type="submit"

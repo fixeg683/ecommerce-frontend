@@ -5,7 +5,33 @@ import {
   logoutUser,
 } from "../services/authService";
 
-const AuthContext = createContext();
+// Extracts a human-readable message from any Django REST Framework error response
+const parseDRFError = (error, fallback = 'Something went wrong') => {
+  const data = error?.response?.data;
+  if (!data) return error?.message || fallback;
+
+  // Flat string fields: { detail: "..." } or { message: "..." }
+  if (typeof data === 'string') return data;
+  if (data.detail) return data.detail;
+  if (data.message) return data.message;
+
+  // Field-level validation errors: { password: ["too short"], username: ["taken"] }
+  if (typeof data === 'object') {
+    const messages = Object.entries(data)
+      .map(([field, errors]) => {
+        const msg = Array.isArray(errors) ? errors.join(' ') : String(errors);
+        // Capitalise field name for readability: "password" → "Password"
+        const label = field.charAt(0).toUpperCase() + field.slice(1);
+        return `${label}: ${msg}`;
+      })
+      .join(' • ');
+    if (messages) return messages;
+  }
+
+  return fallback;
+};
+
+
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -46,10 +72,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        message:
-          error?.response?.data?.detail ||
-          error?.response?.data?.message ||
-          "Login failed",
+        message: parseDRFError(error, 'Login failed'),
       };
     }
   };
@@ -72,10 +95,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        message:
-          error?.response?.data?.detail ||
-          error?.response?.data?.message ||
-          "Registration failed",
+        message: parseDRFError(error, 'Registration failed'),
       };
     }
   };
