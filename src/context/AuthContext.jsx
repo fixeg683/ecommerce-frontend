@@ -31,7 +31,7 @@ const parseDRFError = (error, fallback = 'Something went wrong') => {
   return fallback;
 };
 
-
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
