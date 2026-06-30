@@ -9,11 +9,13 @@ import {
 // Contexts
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
+import { ChatProvider } from './context/ChatContext';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import CartDrawer from './components/CartDrawer';
+import ChatWidget from './components/chat/ChatWidget';
 
 // Pages
 import Home from './pages/Home';
@@ -22,6 +24,8 @@ import Signup from './pages/Signup';
 import Cart from './pages/Cart';
 import Downloads from './pages/Downloads';
 import PaymentSuccess from './pages/PaymentSuccess';
+import ProductDetail from './pages/ProductDetail';
+import ChatPage from './pages/ChatPage';
 
 // Toast
 import { Toaster } from 'react-hot-toast';
@@ -37,7 +41,6 @@ function AppLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 w-full">
-
       {/* Toast Notifications */}
       <Toaster
         position="top-right"
@@ -77,12 +80,13 @@ function AppLayout() {
         }
       >
         <Routes>
-
           {/* Public Routes */}
           <Route
             path="/"
             element={<Home />}
           />
+          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
 
           <Route
             path="/login"
@@ -137,6 +141,7 @@ function AppLayout() {
           © 2026 Nexusmall Marketplace
         </footer>
       )}
+      <ChatWidget />
     </div>
   );
 }
@@ -145,7 +150,9 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <AppLayout />
+        <ChatProvider>
+          <AppLayout />
+        </ChatProvider>
       </CartProvider>
     </AuthProvider>
   );
