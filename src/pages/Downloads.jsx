@@ -2,13 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import API from "../api/axios";
 import DownloadButton from "../components/DownloadButton";
-
-const getProductImage = (imageField) => {
-  if (!imageField) return "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500&auto=format&fit=crop";
-  if (imageField.startsWith("http")) return imageField;
-  const BACKEND_URL = (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-2hqt.onrender.com/api').replace(/\/+$/, '');
-  return `${BACKEND_URL}${imageField}`;
-};
+import { getProductImageFallback, resolveProductImage } from "../utils/productImage";
 
 const Downloads = () => {
   const [products, setProducts] = useState([]);
@@ -70,10 +64,10 @@ const Downloads = () => {
               className="border rounded-lg p-4 bg-white shadow-sm"
             >
               <img
-                src={getProductImage(product.image)}
+                src={resolveProductImage(product) || getProductImageFallback()}
                 alt={product.name}
                 className="w-full h-48 object-cover rounded"
-                onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500&auto=format&fit=crop" }}
+                onError={(e) => { e.target.src = getProductImageFallback(); }}
               />
 
               <h2 className="text-xl font-bold mt-3">{product.name}</h2>

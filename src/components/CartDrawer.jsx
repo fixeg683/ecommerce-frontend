@@ -1,16 +1,9 @@
 import { X, Trash2, Plus, Minus, ShoppingBag, ImageOff } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
+import { resolveProductImage, getProductImageFallback } from '../utils/productImage';
 
-const BACKEND_URL =
-  (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-2hqt.onrender.com/api').replace(/\/+$/, '');
-
-const getImageUrl = (item) => {
-  if (item.image_url) return item.image_url;
-  if (!item.image) return null;
-  if (item.image.startsWith('http')) return item.image;
-  return `${BACKEND_URL}${item.image}`;
-};
+const getImageUrl = (item) => resolveProductImage(item) || getProductImageFallback();
 
 const CartDrawer = () => {
   const { cart, cartOpen, setCartOpen, removeFromCart, updateQuantity, totalItems, totalPrice } = useCart();

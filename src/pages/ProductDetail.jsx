@@ -4,13 +4,7 @@ import api from '../api/axios';
 import { useCart } from '../context/CartContext';
 import { useChat } from '../context/ChatContext';
 import { trackClick, trackView } from '../services/chatService';
-
-const getProductImage = (imageField) => {
-  if (!imageField) return "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500&auto=format&fit=crop";
-  if (imageField.startsWith("http")) return imageField;
-  const BACKEND_URL = (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-2hqt.onrender.com/api').replace(/\/+$/, '');
-  return `${BACKEND_URL}${imageField}`;
-};
+import { getProductImageFallback, resolveProductImage } from '../utils/productImage';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -28,10 +22,10 @@ const ProductDetail = () => {
   return (
     <div className="container mx-auto flex flex-col gap-10 p-10 md:flex-row">
       <img 
-        src={getProductImage(product.image)} 
+        src={resolveProductImage(product) || getProductImageFallback()} 
         className="w-full rounded-lg shadow-lg md:w-1/2" 
         alt={product.name || ""} 
-        onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500&auto=format&fit=crop" }}
+        onError={(e) => { e.target.src = getProductImageFallback(); }}
       />
       <div className="flex-1">
         <h1 className="text-4xl font-bold">{product.name}</h1>
