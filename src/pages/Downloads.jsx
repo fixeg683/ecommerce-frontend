@@ -3,6 +3,13 @@ import React, { useEffect, useState } from "react";
 import API from "../api/axios";
 import DownloadButton from "../components/DownloadButton";
 
+const getProductImage = (imageField) => {
+  if (!imageField) return "https://via.placeholder.com/300x200.png?text=No+Image";
+  if (imageField.startsWith("http")) return imageField;
+  const BACKEND_URL = (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-2hqt.onrender.com/api').replace(/\/+$/, '');
+  return `${BACKEND_URL}${imageField}`;
+};
+
 const Downloads = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,7 +70,7 @@ const Downloads = () => {
               className="border rounded-lg p-4 bg-white shadow-sm"
             >
               <img
-                src={product.image}
+                src={getProductImage(product.image)}
                 alt={product.name}
                 className="w-full h-48 object-cover rounded"
               />

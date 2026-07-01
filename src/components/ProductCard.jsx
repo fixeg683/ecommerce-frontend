@@ -8,11 +8,10 @@ import api from '../api/axios';
 const BACKEND_URL =
   (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-2hqt.onrender.com/api').replace(/\/+$/, '');
 
-const getFullImageUrl = (product) => {
-  if (product.image_url) return product.image_url;
-  if (!product.image) return null;
-  if (product.image.startsWith('http')) return product.image;
-  return `${BACKEND_URL}${product.image}`;
+const getProductImage = (imageField) => {
+  if (!imageField) return "https://via.placeholder.com/300x200.png?text=No+Image";
+  if (imageField.startsWith("http")) return imageField;
+  return `${BACKEND_URL}${imageField}`;
 };
 
 // Colour coding per product type
@@ -31,8 +30,8 @@ const ProductCard = ({ product }) => {
   const [imgError, setImgError] = useState(false);
   const [added, setAdded] = useState(false);
 
-  const imageUrl = getFullImageUrl(product);
-  const showImage = imageUrl && !imgError;
+  const imageUrl = getProductImage(product.image_url || product.image);
+  const showImage = !!imageUrl;
   const isPaid = hasPaid(product.id);
   const isEbook = product.is_ebook || product.product_type === 'ebook';
   const hasFile = !!(product.file || product.ebook_file || product.download_url);
@@ -83,7 +82,7 @@ const ProductCard = ({ product }) => {
             <img
               src={imageUrl} alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              onError={() => setImgError(true)}
+              onError={(e) => { e.target.src = "https://via.placeholder.com/300x200.png?text=Error" }}
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 gap-2">
