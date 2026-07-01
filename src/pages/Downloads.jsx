@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import API from "../api/axios";
 import DownloadButton from "../components/DownloadButton";
-import { getProductImageFallback, resolveProductImage } from "../utils/productImage";
+import { getProductImageFallback, handleImageFallback, resolveProductImage } from "../utils/productImage";
 
 const Downloads = () => {
   const [products, setProducts] = useState([]);
@@ -67,7 +67,7 @@ const Downloads = () => {
                 src={resolveProductImage(product) || getProductImageFallback()}
                 alt={product.name}
                 className="w-full h-48 object-cover rounded"
-                onError={(e) => { e.target.src = getProductImageFallback(); }}
+                onError={handleImageFallback}
               />
 
               <h2 className="text-xl font-bold mt-3">{product.name}</h2>

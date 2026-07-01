@@ -4,7 +4,7 @@ import api from '../api/axios';
 import { useCart } from '../context/CartContext';
 import { useChat } from '../context/ChatContext';
 import { trackClick, trackView } from '../services/chatService';
-import { getProductImageFallback, resolveProductImage } from '../utils/productImage';
+import { getProductImageFallback, handleImageFallback, resolveProductImage } from '../utils/productImage';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -25,7 +25,7 @@ const ProductDetail = () => {
         src={resolveProductImage(product) || getProductImageFallback()} 
         className="w-full rounded-lg shadow-lg md:w-1/2" 
         alt={product.name || ""} 
-        onError={(e) => { e.target.src = getProductImageFallback(); }}
+        onError={handleImageFallback}
       />
       <div className="flex-1">
         <h1 className="text-4xl font-bold">{product.name}</h1>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import { getProductImageFallback, resolveProductImage } from '../utils/productImage';
+import { getProductImageFallback, handleImageFallback, resolveProductImage } from '../utils/productImage';
 
 // Colour coding per product type
 const TYPE_STYLES = {
@@ -74,7 +74,7 @@ const ProductCard = ({ product }) => {
             <img
               src={imageUrl} alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              onError={(e) => { e.target.src = getProductImageFallback(); }}
+              onError={handleImageFallback}
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 gap-2">

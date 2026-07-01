@@ -1,7 +1,7 @@
 import { X, Trash2, Plus, Minus, ShoppingBag, ImageOff } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
-import { resolveProductImage, getProductImageFallback } from '../utils/productImage';
+import { resolveProductImage, getProductImageFallback, handleImageFallback } from '../utils/productImage';
 
 const getImageUrl = (item) => resolveProductImage(item) || getProductImageFallback();
 
@@ -62,7 +62,7 @@ const CartDrawer = () => {
                   <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
                     {imageUrl ? (
                       <img src={imageUrl} alt={item.name} className="w-full h-full object-cover"
-                        onError={(e) => { e.target.style.display = 'none'; }} />
+                        onError={handleImageFallback} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <ImageOff size={20} className="text-gray-300" />
