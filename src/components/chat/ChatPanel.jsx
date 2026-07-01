@@ -33,20 +33,20 @@ export default function ChatPanel() {
   }, [sessionId, setSessionId, setMessages]);
 
   return (
-    <div className="fixed bottom-24 right-6 z-40 flex h-[580px] w-[360px] flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl">
-      <div className="flex items-center justify-between border-b bg-black px-4 py-3 text-white">
+    <div className="fixed inset-x-3 bottom-24 z-40 flex h-[min(620px,calc(100dvh-8rem))] flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl sm:inset-x-auto sm:right-6 sm:w-[380px]">
+      <div className="sticky top-0 z-10 flex flex-shrink-0 items-center justify-between border-b bg-black px-4 py-3 text-white">
         <div className="flex items-center gap-2">
-          <button onClick={closeChat} className="rounded-full p-1 hover:bg-white/10">
+          <button onClick={closeChat} className="rounded-full p-1 hover:bg-white/10" aria-label="Close chat">
             <ArrowLeft size={18} />
           </button>
           <div>
-            <p className="font-semibold">Nexusmal Assistant</p>
+            <p className="font-semibold">Nexusmall Assistant</p>
             <p className="text-xs text-gray-300">Always here to help</p>
           </div>
         </div>
         <Sparkles size={18} />
       </div>
-      <div className="flex-1 overflow-y-auto p-3">
+      <div className="min-h-0 flex-1 overflow-y-auto p-3">
         {loading ? (
           <div className="mt-10 text-center text-sm text-gray-500">Connecting...</div>
         ) : messages.length === 0 ? (
