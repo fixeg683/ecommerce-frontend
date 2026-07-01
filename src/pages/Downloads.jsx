@@ -4,7 +4,7 @@ import API from "../api/axios";
 import DownloadButton from "../components/DownloadButton";
 
 const getProductImage = (imageField) => {
-  if (!imageField) return "https://via.placeholder.com/300x200.png?text=No+Image";
+  if (!imageField) return "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500&auto=format&fit=crop";
   if (imageField.startsWith("http")) return imageField;
   const BACKEND_URL = (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-2hqt.onrender.com/api').replace(/\/+$/, '');
   return `${BACKEND_URL}${imageField}`;
@@ -73,6 +73,7 @@ const Downloads = () => {
                 src={getProductImage(product.image)}
                 alt={product.name}
                 className="w-full h-48 object-cover rounded"
+                onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500&auto=format&fit=crop" }}
               />
 
               <h2 className="text-xl font-bold mt-3">{product.name}</h2>

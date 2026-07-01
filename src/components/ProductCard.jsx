@@ -9,7 +9,7 @@ const BACKEND_URL =
   (import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-2hqt.onrender.com/api').replace(/\/+$/, '');
 
 const getProductImage = (imageField) => {
-  if (!imageField) return "https://via.placeholder.com/300x200.png?text=No+Image";
+  if (!imageField) return "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500&auto=format&fit=crop";
   if (imageField.startsWith("http")) return imageField;
   return `${BACKEND_URL}${imageField}`;
 };
@@ -82,7 +82,7 @@ const ProductCard = ({ product }) => {
             <img
               src={imageUrl} alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              onError={(e) => { e.target.src = "https://via.placeholder.com/300x200.png?text=Error" }}
+              onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500&auto=format&fit=crop" }}
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 gap-2">
