@@ -1,4 +1,4 @@
-﻿import API from "../api/axios";
+import API from "../api/axios";
 
 // =========================
 // REGISTER USER
@@ -14,7 +14,7 @@ export const registerUser = async (userData) => {
 // =========================
 
 export const loginUser = async (credentials) => {
-  const response = await API.post("login/", {
+  const response = await API.post("token/", {
     email: credentials.email,
     password: credentials.password,
   });

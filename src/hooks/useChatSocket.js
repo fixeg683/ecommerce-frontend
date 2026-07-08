@@ -12,7 +12,7 @@ export function useChatSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const host = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
     const wsHost = host.replace(/^https?:\/\//, '');
-    const socket = new WebSocket(`${protocol}://${wsHost}/ws/chat/${sessionId}/`);
+    const socket = new WebSocket(`${protocol}://${wsHost}/ws/chatbot/${sessionId}/`);
     socketRef.current = socket;
 
     socket.onmessage = (event) => {
