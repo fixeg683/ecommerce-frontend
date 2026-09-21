@@ -10,8 +10,10 @@ export function useChatSocket() {
     if (!sessionId) return;
 
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const host = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-    const wsHost = host.replace(/^https?:\/\//, '');
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+    // The backend's websocket route lives at the root (/ws/chatbot/...),
+    // not under /api, so strip any /api suffix before building the host.
+    const wsHost = apiUrl.replace(/^https?:\/\//, '').replace(/\/api\/?$/, '');
     const socket = new WebSocket(`${protocol}://${wsHost}/ws/chatbot/${sessionId}/`);
     socketRef.current = socket;
 

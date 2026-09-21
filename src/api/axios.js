@@ -1,6 +1,6 @@
 ﻿import axios from "axios";
 
-const BASE_URL = "https://backend-ecommerce-3-2hqt.onrender.com/api/";
+const BASE_URL = (import.meta.env.VITE_API_URL || "https://backend-ecommerce-3-2hqt.onrender.com/api").replace(/\/*$/, "/");
 
 const API = axios.create({
   baseURL: BASE_URL,
