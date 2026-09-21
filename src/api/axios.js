@@ -1,12 +1,14 @@
-﻿import axios from "axios";
+import axios from "axios";
 
-const BASE_URL = (import.meta.env.VITE_API_URL || "https://backend-ecommerce-3-2hqt.onrender.com/api").replace(/\/*$/, "/");
+// VITE_API_URL may be supplied by the deployment environment.
+// The production fallback points to the current Render backend and includes /api.
+const BASE_URL = (import.meta.env.VITE_API_URL || "https://backend-ecommerce-3-href.onrender.com/api").replace(/\/*$/, "/");
 
 const API = axios.create({
   baseURL: BASE_URL,
 });
 
-// ── Attach access token to every request ──────────────────────────────────
+// Attach access token to every request
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("access");
@@ -18,9 +20,9 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ── Auto-refresh on 401 and retry the original request ────────────────────
+// Auto-refresh on 401 and retry the original request
 let isRefreshing = false;
-let failedQueue = [];   // requests waiting while token is being refreshed
+let failedQueue = [];
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
@@ -38,11 +40,9 @@ API.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Only attempt refresh on 401, only once per request
     if (error.response?.status === 401 && !originalRequest._retry) {
       const refreshToken = localStorage.getItem("refresh");
 
-      // No refresh token → user is logged out, clear storage
       if (!refreshToken) {
         localStorage.removeItem("access");
         localStorage.removeItem("refresh");
@@ -51,7 +51,6 @@ API.interceptors.response.use(
       }
 
       if (isRefreshing) {
-        // Another request is already refreshing — queue this one
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -78,16 +77,13 @@ API.interceptors.response.use(
 
         originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return API(originalRequest);
-
       } catch (refreshError) {
-        // Refresh failed (token expired/revoked) → log the user out
         processQueue(refreshError, null);
         localStorage.removeItem("access");
         localStorage.removeItem("refresh");
         localStorage.removeItem("user");
         window.location.href = "/login";
         return Promise.reject(refreshError);
-
       } finally {
         isRefreshing = false;
       }
