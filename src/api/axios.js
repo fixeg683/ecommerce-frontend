@@ -2,7 +2,7 @@ import axios from "axios";
 
 // VITE_API_URL may be supplied by the deployment environment.
 // The production fallback points to the current Render backend and includes /api.
-const BASE_URL = (import.meta.env.VITE_API_URL || "https://backend-ecommerce-3-href.onrender.com/api").replace(/\/*$/, "/");
+const BASE_URL = (import.meta.env.VITE_API_URL || "https://backend-ecommerce-3-2hqt.onrender.com/api").replace(/\/*$/, "/");
 
 const API = axios.create({
   baseURL: BASE_URL,
@@ -26,11 +26,8 @@ let failedQueue = [];
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
+    if (error) prom.reject(error);
+    else prom.resolve(token);
   });
   failedQueue = [];
 };
@@ -71,10 +68,8 @@ API.interceptors.response.use(
 
         const newAccess = data.access;
         localStorage.setItem("access", newAccess);
-
         API.defaults.headers.common["Authorization"] = `Bearer ${newAccess}`;
         processQueue(null, newAccess);
-
         originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return API(originalRequest);
       } catch (refreshError) {
