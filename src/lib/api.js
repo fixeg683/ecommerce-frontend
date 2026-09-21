@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Keep the API base URL consistent with the main Axios client.
-const API_URL = (import.meta.env.VITE_API_URL || "https://backend-ecommerce-3-href.onrender.com/api").replace(/\/+$/, "");
+const API_URL = (import.meta.env.VITE_API_URL || "https://backend-ecommerce-3-2hqt.onrender.com/api").replace(/\/+$/, "");
 
 const api = axios.create({
   baseURL: API_URL,
