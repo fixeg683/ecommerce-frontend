@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = (import.meta.env.VITE_API_URL || "https://backend-ecommerce-3-2hqt.onrender.com/api").replace(/\/+$/, "");
+// Keep the API base URL consistent with the main Axios client.
+const API_URL = (import.meta.env.VITE_API_URL || "https://backend-ecommerce-3-href.onrender.com/api").replace(/\/+$/, "");
 
 const api = axios.create({
   baseURL: API_URL,
@@ -17,9 +18,7 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default api;
