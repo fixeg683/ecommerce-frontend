@@ -1,13 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 function Signup() {
   const { register } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const returnTo = location.state?.from || '/';
 
   const [formData, setFormData] = useState({
     username: '',
@@ -17,6 +14,7 @@ function Signup() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,7 +33,7 @@ function Signup() {
       });
 
       if (result.success) {
-        navigate(returnTo, { replace: true });
+        setSuccess(true);
       } else {
         setError(result.message);
       }
@@ -45,6 +43,29 @@ function Signup() {
       setLoading(false);
     }
   };
+
+  if (success) {
+    return (
+      <div className="fixed inset-0 bg-gray-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-10 w-full max-w-md text-center">
+          <h1 className="text-4xl font-black text-green-600 mb-1">Nexusmall</h1>
+          <h2 className="text-2xl font-extrabold text-gray-900 mt-6">Check your email!</h2>
+          <p className="my-4 text-gray-600">
+            We have sent a confirmation link to <strong>{formData.email}</strong>.
+          </p>
+          <p className="text-sm text-gray-500">
+            Please click the link in your email to activate your account before logging in.
+          </p>
+          <Link
+            to="/login"
+            className="inline-block mt-5 px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md no-underline font-medium transition"
+          >
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-gray-50 flex items-center justify-center px-4">

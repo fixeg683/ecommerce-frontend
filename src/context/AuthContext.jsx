@@ -85,13 +85,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await registerUser(formData);
 
-      // AUTO LOGIN AFTER REGISTER
-      const loginResult = await login(
-        formData.email,
-        formData.password
-      );
-
-      return loginResult;
+      return { success: true };
     } catch (error) {
       return {
         success: false,
