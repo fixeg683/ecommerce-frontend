@@ -1,168 +1,166 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
 
-function Signup() {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: ''
-  });
-
+export default function Signup() {
+  const [step, setStep] = useState('signup');
+  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [step, setStep] = useState('form');
+  const [infoMessage, setInfoMessage] = useState('');
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const rawApiUrl = import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-2hqt.onrender.com';
+  const cleanBaseUrl = rawApiUrl.trim().replace(/\/+$/, '').replace(/\/api$/, '');
+
+  const parseResponse = async (res, fallbackMessage) => {
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(`Server returned non-JSON response (${res.status}). ${fallbackMessage}`);
+    }
+    return data;
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setInfoMessage('');
 
     try {
-      const rawApiUrl = import.meta.env.VITE_API_URL || 'https://backend-ecommerce-3-2hqt.onrender.com';
-      const baseUrl = rawApiUrl.replace(/\/+$/, '');
-
-      const res = await fetch(`${baseUrl}/api/register/`, {
+      const res = await fetch(`${cleanBaseUrl}/api/register/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
+          username: formData.username.trim(),
+          email: formData.email.trim(),
           password: formData.password,
         }),
       });
-
-      const text = await res.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (parseError) {
-        throw new Error(
-          `Server returned non-JSON response (${res.status}): ${text.slice(0, 80)}`
-        );
-      }
+      const data = await parseResponse(res, 'Verify backend route.');
 
       if (!res.ok) {
-        const errorMsg =
+        throw new Error(
           data.detail ||
-          (data.username && data.username[0]) ||
-          (data.email && data.email[0]) ||
-          (data.password && data.password[0]) ||
-          'Registration failed';
-        throw new Error(errorMsg);
+            (data.username && data.username[0]) ||
+            (data.email && data.email[0]) ||
+            (data.password && data.password[0]) ||
+            'Registration failed. Please check your credentials.'
+        );
       }
 
       setStep('confirm');
     } catch (err) {
-      setError(err.message || 'Signup failed. Please try again.');
+      setError(err.message || 'Registration failed.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (step === 'confirm') {
-    return (
-      <div className="fixed inset-0 bg-gray-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-10 w-full max-w-md text-center">
-          <h1 className="text-4xl font-black text-green-600 mb-1">Nexusmall</h1>
-          <h2 className="text-2xl font-extrabold text-gray-900 mt-6">Check your email!</h2>
-          <p className="my-4 text-gray-600">
-            We have sent a confirmation link to <strong>{formData.email}</strong>.
-          </p>
-          <p className="text-sm text-gray-500">
-            Please click the link in your email to activate your account before logging in.
-          </p>
-          <Link
-            to="/login"
-            className="inline-block mt-5 px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md no-underline font-medium transition"
-          >
-            Go to Login
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch(`${cleanBaseUrl}/api/verify-code/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ email: formData.email.trim(), code: code.trim() }),
+      });
+      const data = await parseResponse(res, '');
+
+      if (!res.ok) {
+        throw new Error(data.detail || 'Invalid or expired verification code.');
+      }
+
+      setStep('verified');
+    } catch (err) {
+      setError(err.message || 'Verification failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setError('');
+    setInfoMessage('');
+
+    try {
+      const res = await fetch(`${cleanBaseUrl}/api/resend-code/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ email: formData.email.trim() }),
+      });
+      const data = await parseResponse(res, '');
+
+      if (!res.ok) {
+        throw new Error(data.detail || 'Could not resend verification code.');
+      }
+
+      setInfoMessage('A new verification code has been sent to your email.');
+    } catch (err) {
+      setError(err.message || 'Could not resend verification code.');
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-gray-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-10 w-full max-w-md">
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h1 style={styles.logo}>Nexusmall</h1>
+        {error && <div style={styles.errorBox}>{error}</div>}
+        {infoMessage && <div style={styles.infoBox}>{infoMessage}</div>}
 
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-black text-green-600 mb-1">Nexusmall</h1>
-          <p className="text-2xl font-extrabold text-gray-900 mt-4">Create Account</p>
-          <p className="text-gray-500 text-sm mt-1">Join Nexusmall and start shopping</p>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3 mb-6">
-            {error}
-          </div>
+        {step === 'signup' && (
+          <form onSubmit={handleRegister} style={styles.form}>
+            <h2 style={styles.title}>Create Account</h2>
+            <p style={styles.subtitle}>Join Nexusmall and start shopping</p>
+            <input type="text" placeholder="Username" required value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} style={styles.input} />
+            <input type="email" placeholder="Email address" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} style={styles.input} />
+            <input type="password" placeholder="Password" required minLength={8} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} style={styles.input} />
+            <span style={styles.helperText}>Minimum 8 characters</span>
+            <button type="submit" disabled={loading} style={styles.button}>{loading ? 'Creating Account...' : 'Sign Up'}</button>
+            <p style={styles.footerText}>Already have an account? <a href="/login" style={styles.link}>Login</a></p>
+          </form>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {step === 'confirm' && (
+          <form onSubmit={handleVerifyCode} style={styles.form}>
+            <h2 style={styles.title}>Verify your email</h2>
+            <p style={styles.subtitle}>We sent a 6-digit code to <strong>{formData.email}</strong>.</p>
+            <input type="text" maxLength={6} placeholder="1 2 3 4 5 6" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} style={styles.otpInput} autoFocus required />
+            <button type="submit" disabled={loading || code.length !== 6} style={{ ...styles.button, opacity: code.length === 6 ? 1 : 0.6, cursor: code.length === 6 ? 'pointer' : 'not-allowed' }}>{loading ? 'Verifying...' : 'Confirm Code'}</button>
+            <button type="button" onClick={handleResendCode} style={styles.textButton}>Didn't receive the code? Resend</button>
+          </form>
+        )}
 
-          {/* USERNAME */}
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-          />
-
-          {/* EMAIL */}
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-          />
-
-          {/* PASSWORD */}
-          <div>
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength={8}
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-            />
-            <p className="text-xs text-gray-400 mt-1 ml-1">Minimum 8 characters</p>
+        {step === 'verified' && (
+          <div style={{ textAlign: 'center' }}>
+            <h2 style={{ ...styles.title, color: '#22c55e' }}>Account Verified!</h2>
+            <p style={{ ...styles.subtitle, margin: '16px 0 24px' }}>Your email has been confirmed. You can now log in to Nexusmall.</p>
+            <a href="/login" style={{ ...styles.button, display: 'inline-block', textDecoration: 'none' }}>Proceed to Login</a>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white py-3 rounded-lg font-bold flex justify-center items-center gap-2 transition"
-          >
-            {loading && <Loader2 size={18} className="animate-spin" />}
-            {loading ? 'Creating account…' : 'Sign Up'}
-          </button>
-        </form>
-
-        <p className="mt-6 text-center text-sm">
-          Already have an account?{' '}
-          <Link to="/login" className="text-green-600 font-bold">Login</Link>
-        </p>
-
+        )}
       </div>
     </div>
   );
 }
 
-export default Signup;
+const styles = {
+  container: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f0f10', padding: '20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+  card: { width: '100%', maxWidth: '420px', backgroundColor: '#18181b', borderRadius: '12px', padding: '36px 30px', boxShadow: '0 10px 25px rgba(0, 0, 0, 0.4)', textAlign: 'center' },
+  logo: { color: '#22c55e', fontSize: '28px', fontWeight: '800', marginBottom: '18px' },
+  title: { color: '#ffffff', fontSize: '22px', fontWeight: '700', margin: '0 0 6px' },
+  subtitle: { color: '#9ca3af', fontSize: '14px', margin: '0 0 20px' },
+  form: { display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' },
+  input: { width: '100%', padding: '13px 15px', backgroundColor: '#27272a', border: '1px solid #3f3f46', borderRadius: '8px', color: '#ffffff', fontSize: '15px', outline: 'none', boxSizing: 'border-box' },
+  otpInput: { width: '100%', padding: '14px', backgroundColor: '#27272a', border: '1px solid #3f3f46', borderRadius: '8px', color: '#ffffff', fontSize: '24px', letterSpacing: '10px', textAlign: 'center', fontWeight: 'bold', outline: 'none', boxSizing: 'border-box', margin: '8px 0' },
+  helperText: { color: '#71717a', fontSize: '12px', marginTop: '-4px', marginBottom: '6px' },
+  button: { width: '100%', padding: '14px', backgroundColor: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'background-color 0.2s', boxSizing: 'border-box' },
+  textButton: { background: 'none', border: 'none', color: '#22c55e', fontSize: '14px', cursor: 'pointer', textDecoration: 'none', marginTop: '8px', textAlign: 'center' },
+  footerText: { color: '#a1a1aa', fontSize: '14px', textAlign: 'center', marginTop: '16px', marginBottom: 0 },
+  link: { color: '#22c55e', textDecoration: 'none', fontWeight: '600' },
+  errorBox: { backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#f87171', padding: '12px', borderRadius: '8px', fontSize: '13px', marginBottom: '16px', textAlign: 'center' },
+  infoBox: { backgroundColor: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.4)', color: '#4ade80', padding: '12px', borderRadius: '8px', fontSize: '13px', marginBottom: '16px', textAlign: 'center' },
+};
