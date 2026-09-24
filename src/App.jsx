@@ -26,11 +26,12 @@ import Downloads from './pages/Downloads';
 import PaymentSuccess from './pages/PaymentSuccess';
 import ProductDetail from './pages/ProductDetail';
 import ChatPage from './pages/ChatPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 
 // Toast
 import { Toaster } from 'react-hot-toast';
 
-const AUTH_ROUTES = ['/login', '/signup'];
+const AUTH_ROUTES = ['/login', '/signup', '/verify-email'];
 
 function AppLayout() {
   const location = useLocation();
@@ -96,6 +97,11 @@ function AppLayout() {
           <Route
             path="/signup"
             element={<Signup />}
+          />
+
+          <Route
+            path="/verify-email"
+            element={<VerifyEmailPage />}
           />
 
           {/* Protected Routes */}
