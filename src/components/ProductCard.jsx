@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Download, ImageOff, CheckCircle, Lock, BookOpen, User, FileText } from 'lucide-react';
+import { ShoppingCart, Download, ImageOff, CheckCircle, Lock, BookOpen, User, FileText, Clapperboard } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +12,7 @@ const TYPE_STYLES = {
   software: { bg: 'bg-blue-600', label: 'Software', Icon: null },
   game: { bg: 'bg-purple-600', label: 'Game', Icon: null },
   movie: { bg: 'bg-red-600', label: 'Movie', Icon: null },
+  series: { bg: 'bg-red-600', label: 'Series', Icon: Clapperboard },
 };
 
 const ProductCard = ({ product }) => {
