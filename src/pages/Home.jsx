@@ -57,7 +57,7 @@ const Home = () => {
         </h1>
         <p className="mt-3 max-w-3xl text-gray-600 leading-7">
           Discover digital products on Nexusmall Marketplace. Browse software,
-          games, movies and e-books, explore product details, and securely
+          games, movies, series and e-books, explore product details, and securely
           purchase digital products online.
         </p>
       </section>
