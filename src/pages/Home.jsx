@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { PackageSearch, Loader2, AlertTriangle, Monitor, Gamepad2, Film, BookOpen } from 'lucide-react';
+import { PackageSearch, Loader2, AlertTriangle, Monitor, Gamepad2, Film, BookOpen, Clapperboard } from 'lucide-react';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 
@@ -8,10 +8,11 @@ const CATEGORY_ICONS = {
   Softwares: Monitor,
   Games: Gamepad2,
   Movies: Film,
+  Series: Clapperboard,
   'E-Books': BookOpen,
 };
 
-const CATEGORIES = ['All', 'Softwares', 'Games', 'Movies', 'E-Books'];
+const CATEGORIES = ['All', 'Softwares', 'Games', 'Movies', 'Series', 'E-Books'];
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -40,7 +41,8 @@ const Home = () => {
   const filtered = activeCategory === 'All'
     ? products
     : products.filter(p =>
-        p.category_name?.toLowerCase() === activeCategory.toLowerCase()
+        p.category_name?.toLowerCase() === activeCategory.toLowerCase() ||
+        (activeCategory === 'Series' && p.product_type?.toLowerCase() === 'series')
       );
 
   const CategoryIcon = CATEGORY_ICONS[activeCategory];
