@@ -53,7 +53,7 @@ const ProductDetail = () => {
             Ask about this product on WhatsApp
           </button>
           <button
-            onClick={() => window.history.back()
+            onClick={() => window.history.back()}
             className="rounded-full border border-gray-300 px-8 py-3 text-gray-700 hover:bg-gray-100"
           >
             Back
