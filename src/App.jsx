@@ -16,6 +16,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import CartDrawer from './components/CartDrawer';
 import ChatWidget from './components/chat/ChatWidget';
+import WhatsAppButton from './components/WhatsAppButton';
 
 // Pages
 import Home from './pages/Home';
@@ -148,6 +149,7 @@ function AppLayout() {
         </footer>
       )}
       <ChatWidget />
+      <WhatsAppButton />
     </div>
   );
 }
