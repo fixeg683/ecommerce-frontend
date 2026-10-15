@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useChat } from '../context/ChatContext';
 import { trackClick, trackView } from '../services/chatService';
 import { getProductImageFallback, handleImageFallback, resolveProductImage } from '../utils/productImage';
+import { openWhatsApp } from '../components/WhatsAppButton';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -42,7 +43,17 @@ const ProductDetail = () => {
             Add to Shopping Bag
           </button>
           <button
-            onClick={() => window.history.back()}
+            onClick={() => {
+              const productName = product.name || 'this product';
+              const price = product.price ? ' (KES ' + product.price + ')' : '';
+              openWhatsApp('Hello! I am interested in ' + productName + price + '. Please share more details.');
+            }}
+            className="rounded-full bg-[#25D366] px-8 py-3 text-white hover:bg-[#1ebe5d]"
+          >
+            Ask about this product on WhatsApp
+          </button>
+          <button
+            onClick={() => window.history.back()
             className="rounded-full border border-gray-300 px-8 py-3 text-gray-700 hover:bg-gray-100"
           >
             Back
